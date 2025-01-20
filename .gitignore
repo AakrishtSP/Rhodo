@@ -1,3 +1,18 @@
+# Ide files
+.vs/
+.idea/
+.vscode/
+**.sln
+**.vcxproj
+**.vcxproj.filters
+**.vcxproj.user
+**.csproj
+
+# Build files
+**/bin/
+**/obj/
+build/
+
 # Prerequisites
 *.d
 
