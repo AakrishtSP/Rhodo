@@ -1,0 +1,3 @@
+[submodule "Rhodo/vendor/spdlog"]
+	path = Rhodo/vendor/spdlog
+	url = https://github.com/gabime/spdlog

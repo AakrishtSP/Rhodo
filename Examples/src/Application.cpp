@@ -1,15 +1,17 @@
+#include <Rhodo.h>
 
-namespace Rhodo
+class Example : public Rhodo::Application
 {
-	__declspec(dllimport) void Print();
+public:
+	Example()
+	{
+	}
+	~Example()
+	{
+	}
 };
 
-
-
-int main() {
-
-	Rhodo::Print();
-
-	while (true) {}
-	return 0;
+Rhodo::Application* Rhodo::CreateApplication()
+{
+	return new Example();
 }
