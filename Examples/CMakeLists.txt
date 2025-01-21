@@ -1,3 +1,4 @@
+# Cmake: RhodoEngine->Examples
 project(Examples)
 
 # Recursively find all .cpp and .h files in the src directory
@@ -24,7 +25,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE Rhodo)
 set_target_properties(${PROJECT_NAME} PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/bin/${PLATFORM}/${PROJECT_NAME}
         ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/obj/${PLATFORM}/${PROJECT_NAME}
-        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/bin/${PLATFORM}/${PROJECT_NAME}
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/lib/${PLATFORM}/${PROJECT_NAME}
 )
 
 # Set working directory for Examples to be the Examples folder
