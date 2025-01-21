@@ -1,7 +1,3 @@
-; [submodule "Rhodo/extern/spdlog"]
-; 	path = Rhodo/extern/spdlog
-; 	url = https://github.com/gabime/spdlog.git
-; 	branch = v2.x
-; [submodule "Rhodo/extern/fmt"]
-; 	path = Rhodo/extern/fmt
-; 	url = https://github.com/fmtlib/fmt.git
+[submodule "Rhodo/external/spdlog"]
+	path = Rhodo/external/spdlog
+	url = https://github.com/gabime/spdlog.git
