@@ -1,0 +1,4 @@
+[submodule "Rhodo/extern/spdlog"]
+	path = Rhodo/extern/spdlog
+	url = https://github.com/gabime/spdlog.git
+	branch = v2.x
