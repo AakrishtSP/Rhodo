@@ -12,6 +12,7 @@
 **/bin/
 **/obj/
 build/
+cmake-build-debug/
 
 # Prerequisites
 *.d
@@ -45,3 +46,5 @@ build/
 *.exe
 *.out
 *.app
+
+!CMakeLists.txt

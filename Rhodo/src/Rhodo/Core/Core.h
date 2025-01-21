@@ -3,11 +3,9 @@
 // For use by Rhodo applications
 
 //-----------Platform Detection-----------
-#ifdef _WIN64
+#if defined (_WIN64) || defined( __MINGW64__)
 #define RH_PLATFORM_WINDOWS
-#elif __MINGW64__
-#define RH_PLATFORM_WINDOWS
-#elif __linux__
+#elif defined (__linux__)
 #define RH_PLATFORM_LINUX
 #else
 #error "Rhodo only supports Windows and Linux!"

@@ -1,6 +1,5 @@
 #pragma once
-
-#include "Core.h"
+#include "Rhodo/Core/Core.h"
 
 namespace Rhodo
 {
@@ -9,9 +8,8 @@ namespace Rhodo
 	public:
 		Application();
 		virtual ~Application();
-		void Run();
+		static void Run();
 	};
 	// To be defined in CLIENT
 	Application* CreateApplication();
 }
-
