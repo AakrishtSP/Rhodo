@@ -1,15 +1,16 @@
 #pragma once
 #include "Rhodo/Core/Core.h"
 
-namespace Rhodo
-{
-	class RHODO_API Application
-	{
+namespace Rhodo {
+	class RHODO_API Application {
 	public:
 		Application();
+
 		virtual ~Application();
-		static void Run();
+
+		static void run();
 	};
+
 	// To be defined in CLIENT
-	Application* CreateApplication();
+	Application *createApplication();
 }

@@ -2,7 +2,9 @@
 // Created by asp on 1/24/2025.
 //
 
-#include "Polling.h"
+#include "Rhodo/Events/Polling.h"
 
 namespace Rhodo {
+    PollingHandler::~PollingHandler()
+    = default;
 } // Rhodo

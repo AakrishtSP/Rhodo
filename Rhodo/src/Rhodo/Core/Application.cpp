@@ -1,14 +1,14 @@
 #include "Application.h"
 
 
-namespace Rhodo
-{
+namespace Rhodo {
 	Application::Application()
 	= default;
+
 	Application::~Application()
 	= default;
-	void Application::Run()
-	{
+
+	void Application::run() {
 		while (true);
 	}
 }

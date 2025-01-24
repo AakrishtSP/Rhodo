@@ -25,13 +25,7 @@ add_subdirectory(Examples)
 
 # Apply defines globally based on configuration
 add_compile_definitions(
-        $<$<CONFIG:Debug>:RH_DEBUG>          # Define DEBUG_BUILD for Debug builds
-        $<$<CONFIG:Release>:RH_RELEASE>      # Define RELEASE_BUILD for Release builds
-        $<$<CONFIG:RelWithDebInfo>:RH_RELEASE> # Define RELEASE_BUILD for ReleaseWithLog builds
-)
-
-# Enable logging for Debug and ReleaseWithLog builds
-add_compile_definitions(
-        $<$<CONFIG:Debug>:RH_ENABLE_LOGGING>       # Enable logging for Debug
-        $<$<CONFIG:RelWithDebInfo>:RH_ENABLE_LOGGING> # Enable logging for ReleaseWithLog
+        $<$<CONFIG:Debug>:RH_DEBUG;RH_ENABLE_LOGGING;RH_ENABLE_ASSERTS>          # Debug builds
+        $<$<CONFIG:RelWithDebInfo>:RH_RELEASE;RH_ENABLE_LOGGING>                # ReleaseWithLog builds
+        $<$<CONFIG:Release>:RH_RELEASE>                                         # Release builds
 )

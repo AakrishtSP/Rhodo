@@ -1,17 +1,13 @@
 #include <Rhodo.h>
 
-class Example : public Rhodo::Application
-{
+class Examples final : public Rhodo::Application {
 public:
-	Example()
-	{
-	}
-	~Example()
-	{
-	}
+	Examples() = default;
+
+	~Examples() override = default;
 };
 
-Rhodo::Application* Rhodo::CreateApplication()
-{
-	return new Example();
+Rhodo::Application *Rhodo::createApplication() {
+	RH_INFO("Hello from Rhodo!");
+	return new Examples();
 }

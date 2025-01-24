@@ -4,19 +4,12 @@
 #include "Rhodo/Core/Application.h"
 #include "Rhodo/Core/Logger.h"
 
-#if defined RH_PLATFORM_WINDOWS
-
-extern Rhodo::Application* Rhodo::CreateApplication();
-
-int main(int argc, char** argv)
-{
-	Rhodo::Logger::Init();
+int main(int argc, char **argv) {
+	Rhodo::Logger::init();
 	RH_CORE_INFO("Initialized Logger");
 	RH_TRACE("Initialized Logger");
 
-	Rhodo::Application* app = Rhodo::CreateApplication();
-	app->Run();
+	Rhodo::Application *app = Rhodo::createApplication();
+	app->run();
 	delete app;
 }
-
-#endif
