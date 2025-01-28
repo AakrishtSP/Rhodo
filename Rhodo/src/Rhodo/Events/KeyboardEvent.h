@@ -33,7 +33,7 @@ namespace Rhodo {
             return ss.str();
         }
 
-        EVENT_CLASS_TYPE(EventType::KeyPressed)
+        EVENT_CLASS_TYPE(KeyPressed)
 
     private:
         bool m_repeat;
@@ -51,7 +51,7 @@ namespace Rhodo {
             return ss.str();
         }
 
-        EVENT_CLASS_TYPE(EventType::KeyReleased)
+        EVENT_CLASS_TYPE(KeyReleased)
     };
 
     class KeyTypedEvent final : public KeyboardEvent {
@@ -66,6 +66,6 @@ namespace Rhodo {
             return ss.str();
         }
 
-        EVENT_CLASS_TYPE(EventType::KeyTyped)
+        EVENT_CLASS_TYPE(KeyTyped)
     };
 }

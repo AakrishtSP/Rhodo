@@ -1,4 +1,6 @@
 #pragma once
+#include "Rhodo/Core/Window.h"
+
 #include "Rhodo/Core/Core.h"
 
 namespace Rhodo {
@@ -8,7 +10,11 @@ namespace Rhodo {
 
 		virtual ~Application();
 
-		static void run();
+		void run() const;
+
+	private:
+		scope<Window> m_window;
+		bool m_running;
 	};
 
 	// To be defined in CLIENT

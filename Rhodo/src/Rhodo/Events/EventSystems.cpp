@@ -1,6 +1,4 @@
-//
-// Created by asp on 1/24/2025.
-//
+
 #include "Rhodo/Events/EventSystems.h"
 
 namespace Rhodo {

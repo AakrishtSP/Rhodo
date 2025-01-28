@@ -51,7 +51,7 @@ namespace Rhodo {
             return ss.str();
         }
 
-        EVENT_CLASS_TYPE(EventType::GamepadButtonPressed)
+        EVENT_CLASS_TYPE(GamepadButtonPressed)
     };
 
     class GamepadButtonReleasedEvent final : public GamepadButtonEvent {
@@ -66,7 +66,7 @@ namespace Rhodo {
             return ss.str();
         }
 
-        EVENT_CLASS_TYPE(EventType::GamepadButtonReleased)
+        EVENT_CLASS_TYPE(GamepadButtonReleased)
     };
 
     class GamepadAxisMovedEvent final : public GamepadEvent {
@@ -85,7 +85,7 @@ namespace Rhodo {
             return ss.str();
         }
 
-        EVENT_CLASS_TYPE(EventType::GamepadAxisMoved)
+        EVENT_CLASS_TYPE(GamepadAxisMoved)
         EVENT_CLASS_CATEGORY(EventCategory::EventCategoryGamepad | EventCategory::EventCategoryGamepadAxis)
 
     private:
@@ -109,7 +109,7 @@ namespace Rhodo {
             return ss.str();
         }
 
-        EVENT_CLASS_TYPE(EventType::GamepadTriggerMoved)
+        EVENT_CLASS_TYPE(GamepadTriggerMoved)
         EVENT_CLASS_CATEGORY(EventCategory::EventCategoryGamepad | EventCategory::EventCategoryGamepadTrigger)
 
     private:
@@ -130,7 +130,7 @@ namespace Rhodo {
             return ss.str();
         }
 
-        EVENT_CLASS_TYPE(EventType::GamepadConnected)
+        EVENT_CLASS_TYPE(GamepadConnected)
     };
 
     class GamepadDisconnectedEvent final : public GamepadEvent {
@@ -146,6 +146,6 @@ namespace Rhodo {
             return ss.str();
         }
 
-        EVENT_CLASS_TYPE(EventType::GamepadDisconnected)
+        EVENT_CLASS_TYPE(GamepadDisconnected)
     };
 }

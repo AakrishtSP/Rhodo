@@ -20,7 +20,7 @@ namespace Rhodo {
 			return ss.str();
 		}
 
-		EVENT_CLASS_TYPE(EventType::MouseMoved)
+		EVENT_CLASS_TYPE(MouseMoved)
 		EVENT_CLASS_CATEGORY(EventCategory::EventCategoryMouse | EventCategory::EventCategoryInput)
 
 	private:
@@ -42,7 +42,7 @@ namespace Rhodo {
 			return ss.str();
 		}
 
-		EVENT_CLASS_TYPE(EventType::MouseScrolled)
+		EVENT_CLASS_TYPE(MouseScrolled)
 		EVENT_CLASS_CATEGORY(EventCategory::EventCategoryMouse | EventCategory::EventCategoryInput)
 
 	private:
@@ -77,7 +77,7 @@ namespace Rhodo {
 			return ss.str();
 		}
 
-		EVENT_CLASS_TYPE(EventType::MouseButtonPressed)
+		EVENT_CLASS_TYPE(MouseButtonPressed)
 	};
 
 	class MouseButtonReleasedEvent final : public MouseButtonEvent {
@@ -92,6 +92,6 @@ namespace Rhodo {
 			return ss.str();
 		}
 
-		EVENT_CLASS_TYPE(EventType::MouseButtonReleased)
+		EVENT_CLASS_TYPE(MouseButtonReleased)
 	};
 }

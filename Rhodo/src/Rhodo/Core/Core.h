@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Rhodo/Core/PlatformDetection.h"
+#include <memory>
 
 //-----------Export/Import Macro-----------
 #ifdef RH_PLATFORM_WINDOWS
@@ -67,3 +68,26 @@
 #define RH_BIT_CLEAR(x, y) (x &= ~RH_EXPAND_MACRO(RH_BIT_LEFT_SHIFT(y)))
 #define RH_BIT_TOGGLE(x, y) (x ^= RH_EXPAND_MACRO(RH_BIT_LEFT_SHIFT(y)))
 //-----------------------------------------
+
+
+//-----------Function Bind Macro-----------
+#define RH_BIND_EVENT_FN(fn) [this](auto&&... args) -> decltype(auto) { return this->fn(std::forward<decltype(args)>(args)...); }
+
+//-----------------------------------------
+namespace Rhodo {
+    template<typename T>
+    using scope = std::unique_ptr<T>;
+
+    template<typename T, typename... Args>
+    constexpr scope<T> createScope(Args &&... args) {
+        return std::make_unique<T>(std::forward<Args>(args)...);
+    }
+
+    template<typename T>
+    using ref = std::shared_ptr<T>;
+
+    template<typename T, typename... Args>
+    constexpr ref<T> createRef(Args &&... args) {
+        return std::make_shared<T>(std::forward<Args>(args)...);
+    }
+}

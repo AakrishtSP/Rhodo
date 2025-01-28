@@ -1,8 +1,9 @@
+// Rhodo/src/Rhodo/Events/ApplicationEvent.h
+
 #pragma once
 
 #include "Rhodo/Events/Event.h"
 #include "rhpch.h"
-#include "Rhodo/Events/Input/KeyCodes.h"
 
 namespace Rhodo {
     class WindowResizeEvent final : public Event {
@@ -20,7 +21,7 @@ namespace Rhodo {
             return ss.str();
         }
 
-        EVENT_CLASS_TYPE(EventType::WindowResize)
+        EVENT_CLASS_TYPE(WindowResize)
         EVENT_CLASS_CATEGORY(static_cast<int>(EventCategory::EventCategoryApplication))
 
     private:
@@ -31,7 +32,7 @@ namespace Rhodo {
     public:
         WindowCloseEvent() = default;
 
-        EVENT_CLASS_TYPE(EventType::WindowClose)
+        EVENT_CLASS_TYPE(WindowClose)
         EVENT_CLASS_CATEGORY(static_cast<int>(EventCategory::EventCategoryApplication))
     };
 
@@ -39,7 +40,7 @@ namespace Rhodo {
     public:
         AppTickEvent() = default;
 
-        EVENT_CLASS_TYPE(EventType::AppTick)
+        EVENT_CLASS_TYPE(AppTick)
         EVENT_CLASS_CATEGORY(static_cast<int>(EventCategory::EventCategoryApplication))
     };
 
@@ -47,7 +48,7 @@ namespace Rhodo {
     public:
         AppUpdateEvent() = default;
 
-        EVENT_CLASS_TYPE(EventType::AppUpdate)
+        EVENT_CLASS_TYPE(AppUpdate)
         EVENT_CLASS_CATEGORY(static_cast<int>(EventCategory::EventCategoryApplication))
     };
 
@@ -55,7 +56,7 @@ namespace Rhodo {
     public:
         AppRenderEvent() = default;
 
-        EVENT_CLASS_TYPE(EventType::AppRender)
+        EVENT_CLASS_TYPE(AppRender)
         EVENT_CLASS_CATEGORY(static_cast<int>(EventCategory::EventCategoryApplication))
     };
 }

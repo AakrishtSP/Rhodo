@@ -1,6 +1,4 @@
-//
-// Created by asp on 1/23/2025.
-//
+
 
 #pragma once
 #include "Rhodo/Core/Core.h"
@@ -82,7 +80,7 @@ namespace Rhodo {
         // Define a pure virtual method that must be implemented by custom events
         virtual void customEventLogic() const = 0;
 
-        EVENT_CLASS_TYPE(EventType::Custom)
+        EVENT_CLASS_TYPE(Custom)
         EVENT_CLASS_CATEGORY(static_cast<int>(EventCategory::EventCategoryCustom))
 
         [[nodiscard]] std::string toString() const override {

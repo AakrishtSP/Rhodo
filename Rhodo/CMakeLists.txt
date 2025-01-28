@@ -14,16 +14,21 @@ add_library(${PROJECT_NAME} SHARED ${SOURCES} include/Rhodo.h)
 # Add GLM as a submodule
 add_subdirectory(external/glm)
 
+# Add GLFW
+add_subdirectory(external/glfw)
+
 # Add include directories for Rhodo
 target_include_directories(${PROJECT_NAME}
         PUBLIC src
         PUBLIC ${CMAKE_SOURCE_DIR}/Rhodo/external/spdlog/include  # Include spdlog
         PUBLIC ${CMAKE_SOURCE_DIR}/Rhodo/external/glm  # Include glm
+        PUBLIC ${CMAKE_SOURCE_DIR}/Rhodo/external/glfw/include  # Include GLFW
         INTERFACE include
 )
 
 target_precompile_headers(${PROJECT_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/Rhodo/src/rhpch.h")
 
+target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 
 # Add defines for Rhodo
 target_compile_definitions(${PROJECT_NAME} PRIVATE RH_BUILD_SHARED)
