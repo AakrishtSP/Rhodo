@@ -2,79 +2,46 @@
 #include "Rhodo/Events/EventSystems.h"
 
 namespace Rhodo {
-    void BlockingEventSystem::subscribe(EventType type, const std::function<void(const Event &)> &listener) {
-        m_listeners[type].push_back(listener);
+    EventSystem::SubscriptionToken EventSystem::Subscribe(const size_t eventType, Listener listener) {
+        const size_t id = m_nextId++;
+        m_listeners[eventType].emplace_back(id, std::move(listener));
+        return {eventType, id,};
     }
 
-    void BlockingEventSystem::dispatch(const Event &event) {
-        if (const auto it = m_listeners.find(event.getEventType()); it != m_listeners.end()) {
-            for (const auto &listener: it->second) {
-                listener(event); // Call listeners directly
-            }
+    void EventSystem::Unsubscribe(SubscriptionToken token) {
+        auto &listeners = m_listeners[token.eventType];
+        listeners.erase(
+            std::remove_if(listeners.begin(), listeners.end(),
+                           [token](const auto &pair) { return pair.first == token.listenerId; }),
+            listeners.end());
+    }
+
+    void EventSystem::DispatchImmediately(const Event &event) {
+        std::vector<std::pair<size_t, Listener> > listeners;
+        if (const auto it = m_listeners.find(event.getType()); it != m_listeners.end()) {
+            listeners = it->second;
+        }
+
+        for (const auto &[id, listener]: listeners) {
+            if (listener)
+                listener(event);
         }
     }
 
-
-    void QueuedEventSystem::subscribe(EventType type, const std::function<void(const Event &)> &listener) {
-        m_listeners[type].push_back(listener);
+    void EventSystem::QueueEvent(scope<Event> event) {
+        m_eventQueue.push(std::move(event));
     }
 
-
-    void QueuedEventSystem::queueEvent(const Event &event) {
-        m_eventQueue.push(&event);
-    }
-
-    void QueuedEventSystem::processEvents() {
-        while (!m_eventQueue.empty()) {
-            const Event *event = m_eventQueue.front();
-            m_eventQueue.pop();
-
-            if (auto it = m_listeners.find(event->getEventType()); it != m_listeners.end()) {
-                for (const auto &listener: it->second) {
-                    listener(*event); // Process queued events
-                }
-            }
+    void EventSystem::ProcessQueue() {
+        std::queue<scope<Event> > processing_queue; {
+            processing_queue.swap(m_eventQueue);
         }
-    }
 
-    void HybridEventSystem::subscribe(EventType type, const std::function<void(const Event &)> &listener) {
-        m_listeners[type].push_back(listener);
-    }
-
-    void HybridEventSystem::dispatch(const Event &event) {
-        if (const auto it = m_listeners.find(event.getEventType()); it != m_listeners.end()) {
-            for (const auto &listener: it->second) {
-                listener(event); // Call m_listeners directly
-            }
+        while (!processing_queue.empty()) {
+            auto &event = processing_queue.front();
+            DispatchImmediately(*event);
+            processing_queue.pop();
         }
-    }
-
-    void HybridEventSystem::queueEvent(const Event &event) {
-        m_eventQueue.push(&event);
-    }
-
-    void HybridEventSystem::processEvents() {
-        while (!m_eventQueue.empty()) {
-            const Event *event = m_eventQueue.front();
-            m_eventQueue.pop();
-
-            if (auto it = m_listeners.find(event->getEventType()); it != m_listeners.end()) {
-                for (const auto &listener: it->second) {
-                    listener(*event); // Process queued events
-                }
-            }
-        }
-    }
-
-    // No-op for queue-related methods
-    void BlockingEventSystem::queueEvent(const Event &event) {
-    }
-
-    void BlockingEventSystem::processEvents() {
-    }
-
-    // No-op for immediate dispatch
-    void QueuedEventSystem::dispatch(const Event &event) {
     }
 }
 

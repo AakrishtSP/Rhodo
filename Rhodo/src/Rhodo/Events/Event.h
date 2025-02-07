@@ -40,7 +40,8 @@ namespace Rhodo {
 
 #define EVENT_CLASS_TYPE(type) static EventType getStaticType() { return EventType::type; }\
                                virtual EventType getEventType() const override { return getStaticType(); }\
-                               virtual const char* getName() const override { return #type; }
+                               virtual const char* getName() const override { return #type; }\
+                               virtual size_t getType() const override { return typeid(this).hash_code(); }
 
 #define EVENT_CLASS_CATEGORY(category) virtual int getCategory() const override { return category; }
 
@@ -58,6 +59,8 @@ namespace Rhodo {
         virtual ~Event() = default;
 
         [[nodiscard]] virtual EventType getEventType() const = 0;
+
+        [[nodiscard]] virtual size_t getType() const = 0;
 
         [[nodiscard]] virtual int getCategory() const = 0;
 

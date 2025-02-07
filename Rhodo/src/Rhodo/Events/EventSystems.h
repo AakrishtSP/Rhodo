@@ -6,66 +6,32 @@
 #include "rhpch.h"
 
 namespace Rhodo {
-    // Event System Interface
-    class IEventSystem {
+    // Event System
+    class EventSystem {
     public:
-        virtual ~IEventSystem() = default;
+        using Listener = std::function<void(const Event &)>;
 
-        virtual void subscribe(EventType type, const std::function<void(const Event &)> &listener) = 0;
+        struct SubscriptionToken {
+            size_t eventType; // hash of the event type
+            size_t listenerId;
+        };
 
-        virtual void dispatch(const Event &event) = 0;
+        SubscriptionToken Subscribe(size_t eventType, Listener listener);
 
-        virtual void queueEvent(const Event &event) = 0;
+        void Unsubscribe(SubscriptionToken token);
 
-        virtual void processEvents() = 0;
-    };
+        void DispatchImmediately(const Event &event);
 
+        void QueueEvent(scope<Event> event);
 
-    // Blocking Event System
-    class BlockingEventSystem final : public IEventSystem {
-    public:
-        void subscribe(EventType type, const std::function<void(const Event &)> &listener) override;
+        void ProcessQueue();
 
-        void dispatch(const Event &event) override;
-
-        // No-op for queue-related methods
-        void queueEvent(const Event &event) override;
-
-        void processEvents() override;
-
-    protected:
-        std::unordered_map<EventType, std::vector<std::function<void(const Event &)> > > m_listeners;
-    };
-
-    // Queued Event System
-    class QueuedEventSystem final : public IEventSystem {
-    public:
-        void subscribe(EventType type, const std::function<void(const Event &)> &listener) override;
-
-        void dispatch(const Event &event) override;
-
-        void queueEvent(const Event &event) override;
-
-        void processEvents() override;
-
-    protected:
-        std::unordered_map<EventType, std::vector<std::function<void(const Event &)> > > m_listeners;
-        std::queue<const Event *> m_eventQueue;
-    };
-
-    // Hybrid Event System
-    class HybridEventSystem final : public IEventSystem {
-    public:
-        void subscribe(EventType type, const std::function<void(const Event &)> &listener) override;
-
-        void dispatch(const Event &event) override;
-
-        void queueEvent(const Event &event) override;
-
-        void processEvents() override;
-
-    protected:
-        std::unordered_map<EventType, std::vector<std::function<void(const Event &)> > > m_listeners;
-        std::queue<const Event *> m_eventQueue;
+    private:
+        // m_listener = eventType -> listenerId, listener
+        std::unordered_map<size_t, std::vector<std::pair<size_t, Listener> > > m_listeners;
+        std::queue<scope<Event> > m_eventQueue;
+        size_t m_nextId = 0;
     };
 }
+
+

@@ -39,13 +39,14 @@ namespace Rhodo {
         bool m_repeat;
     };
 
+
     class KeyReleasedEvent final : public KeyboardEvent {
     public:
         explicit KeyReleasedEvent(const KeyCode keycode)
             : KeyboardEvent(keycode) {
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             std::stringstream ss;
             ss << "KeyReleasedEvent: " << m_keyCode;
             return ss.str();
@@ -60,7 +61,7 @@ namespace Rhodo {
             : KeyboardEvent(keycode) {
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             std::stringstream ss;
             ss << "KeyTypedEvent: " << m_keyCode;
             return ss.str();
