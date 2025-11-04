@@ -13,3 +13,6 @@
 	path = Rhodo/external/imgui
 	url = https://github.com/ocornut/imgui.git
 	branch = docking
+[submodule "Rhodo/external/glad"]
+	path = Rhodo/external/glad
+	url = https://github.com/Dav1dde/glad.git

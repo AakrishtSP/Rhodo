@@ -25,7 +25,8 @@ add_subdirectory(Examples)
 
 # Apply defines globally based on configuration
 add_compile_definitions(
-        $<$<CONFIG:Debug>:RH_DEBUG;RH_ENABLE_LOGGING;RH_ENABLE_ASSERTS>          # Debug builds
-        $<$<CONFIG:RelWithDebInfo>:RH_RELEASE;RH_ENABLE_LOGGING>                # ReleaseWithLog builds
+#        $<IF:$<PLATFORM_ID:Windows>,RH_PLATFORM_WINDOWS,$<IF:$<PLATFORM_ID:Linux>,RH_PLATFORM_LINUX,RH_PLATFORM_UNIX>>  # Platform
+        $<$<CONFIG:Debug>:RH_DEBUG;RH_ENABLE_LOGGING;RH_ENABLE_ASSERTS;RH_ENABLE_EVENT_NAMES>          # Debug builds
+        $<$<CONFIG:RelWithDebInfo>:RH_RELEASE;RH_ENABLE_LOGGING;RH_ENABLE_EVENT_NAMES>                # ReleaseWithLog builds
         $<$<CONFIG:Release>:RH_RELEASE>                                         # Release builds
 )

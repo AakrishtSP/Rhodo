@@ -16,7 +16,8 @@ target_include_directories(${PROJECT_NAME}
 )
 
 # Add defines for Examples
-target_compile_definitions(${PROJECT_NAME} PRIVATE RH_IMPORT_SHARED)
+#target_compile_definitions(${PROJECT_NAME} PRIVATE RH_IMPORT_SHARED)
+target_compile_definitions(${PROJECT_NAME} PRIVATE RH_IMPORT_STATIC)
 
 # Link Rhodo to Examples
 target_link_libraries(${PROJECT_NAME} PRIVATE Rhodo)
@@ -31,12 +32,12 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 # Set working directory for Examples to be the Examples folder
 set_target_properties(${PROJECT_NAME} PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/Examples)
 
-# Post-build process to copy Rhodo DLL to Examples build directory
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-        $<TARGET_FILE:Rhodo>
-        ${CMAKE_BINARY_DIR}/build/bin/${PLATFORM}/${PROJECT_NAME}
-)
+## Post-build process to copy Rhodo DLL to Examples build directory
+#add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+#        COMMAND ${CMAKE_COMMAND} -E copy
+#        $<TARGET_FILE:Rhodo>
+#        ${CMAKE_BINARY_DIR}/build/bin/${PLATFORM}/${PROJECT_NAME}
+#)
 
 # Copy assets to the build directory after building Examples
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD

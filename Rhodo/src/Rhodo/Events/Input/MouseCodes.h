@@ -5,9 +5,7 @@
 
 namespace Rhodo {
     using MouseCode = uint16_t;
-
-    namespace Mouse {
-        enum : MouseCode {
+        enum class MouseButton : MouseCode {
             // From glfw3.h
             Button0 = 0,
             Button1 = 1,
@@ -22,5 +20,4 @@ namespace Rhodo {
             ButtonRight = Button1,
             ButtonMiddle = Button2
         };
-    }
 }

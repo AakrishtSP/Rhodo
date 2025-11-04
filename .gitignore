@@ -12,7 +12,7 @@
 **/bin/
 **/obj/
 build/
-cmake-build-debug/
+cmake-build-*/
 
 # Prerequisites
 *.d

@@ -4,7 +4,7 @@
 #include "Rhodo/Core/Core.h"
 
 namespace Rhodo {
-	class RHODO_API Application {
+	class Application {
 	public:
 		Application();
 

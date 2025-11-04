@@ -1,5 +1,7 @@
 #pragma once
 
+
+// ReSharper disable once CppUnusedIncludeDirective
 #include "Rhodo/Core/PlatformDetection.h"
 #include <memory>
 
@@ -7,11 +9,14 @@
 #ifdef RH_PLATFORM_WINDOWS
 #ifdef RH_BUILD_SHARED
 #define RHODO_API __declspec(dllexport)
-#else
+#elif RH_BUILD_SHARED
 #define RHODO_API __declspec(dllimport)
+#else
+#define RHODO_API
 #endif
 #else
-#define RHODO_API __attribute__((visibility("default")))
+#define RHODO_API
+// #define RHODO_API __attribute__((visibility("default")))
 #endif
 //-----------------------------------------
 
@@ -58,15 +63,6 @@
 #define RH_EXPAND_MACRO(x) x
 #define RH_STRINGIFY_MACRO(x) #x
 #define RH_CONCAT_MACRO(a, b) a##b
-//-----------------------------------------
-
-//-----------Bitwise Operations-----------
-#define RH_BIT_LEFT_SHIFT(x) (1 << x)
-#define RH_BIT_RIGHT_SHIFT(x) (1 >> x)
-#define RH_BIT_CHECK(x, y) (x & RH_EXPAND_MACRO(RH_BIT_LEFT_SHIFT(y)))
-#define RH_BIT_SET(x, y) (x |= RH_EXPAND_MACRO(RH_BIT_LEFT_SHIFT(y)))
-#define RH_BIT_CLEAR(x, y) (x &= ~RH_EXPAND_MACRO(RH_BIT_LEFT_SHIFT(y)))
-#define RH_BIT_TOGGLE(x, y) (x ^= RH_EXPAND_MACRO(RH_BIT_LEFT_SHIFT(y)))
 //-----------------------------------------
 
 

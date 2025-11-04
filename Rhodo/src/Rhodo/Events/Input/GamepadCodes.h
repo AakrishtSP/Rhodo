@@ -1,48 +1,56 @@
 // Rhodo/src/Rhodo/Events/Input/GamepadCodes.h
 #pragma once
-#include "rhpch.h"
 
 namespace Rhodo {
+    using GamepadIDCode = uint8_t;
     using GamepadButtonCode = uint16_t;
+    using GamepadAxisCode = uint16_t;
 
     namespace Gamepad {
-        enum : GamepadButtonCode {
-            // From glfw3.h
+        // IDs
+        enum class GamepadID :  GamepadIDCode   {
+            Controller1 = 0,
+            Controller2 = 1,
+            Controller3 = 2,
+            Controller4 = 3,
+            MaxSupported = 4
+        };
+
+        // Buttons (from glfw3.h)
+        enum class Button : GamepadButtonCode {
             ButtonA = 0,
             ButtonB = 1,
             ButtonX = 2,
             ButtonY = 3,
-            ButtonLeftBumper = 4,
-            ButtonRightBumper = 5,
-            ButtonBack = 6,
-            ButtonStart = 7,
-            ButtonGuide = 8,
-            ButtonLeftThumb = 9,
-            ButtonRightThumb = 10,
-            ButtonDpadUp = 11,
-            ButtonDpadRight = 12,
-            ButtonDpadDown = 13,
-            ButtonDpadLeft = 14,
-            TriggerLeft = 15,
-            TriggerRight = 16,
+            LeftBumper = 4,
+            RightBumper = 5,
+            Back = 6,
+            Start = 7,
+            Guide = 8,
+            LeftThumb = 9,
+            RightThumb = 10,
+            DpadUp = 11,
+            DpadRight = 12,
+            DpadDown = 13,
+            DpadLeft = 14,
 
-            // Aliases
-            ButtonCross = ButtonA,
-            ButtonCircle = ButtonB,
-            ButtonSquare = ButtonX,
-            ButtonTriangle = ButtonY,
-            ButtonL1 = ButtonLeftBumper,
-            ButtonR1 = ButtonRightBumper,
-            ButtonSelect = ButtonBack,
-            ButtonHome = ButtonGuide,
-            ButtonL3 = ButtonLeftThumb,
-            ButtonR3 = ButtonRightThumb,
-            ButtonUp = ButtonDpadUp,
-            ButtonRight = ButtonDpadRight,
-            ButtonDown = ButtonDpadDown,
-            ButtonLeft = ButtonDpadLeft,
-            TriggerL2 = TriggerLeft,
-            TriggerR2 = TriggerRight
+            // Platform aliases
+            Cross = ButtonA,
+            Circle = ButtonB,
+            Square = ButtonX,
+            Triangle = ButtonY,
+            Share = Back,
+            Options = Start
+        };
+
+        // Axes (from glfw3.h)
+        enum class Axis : GamepadAxisCode {
+            LeftX = 0,
+            LeftY = 1,
+            RightX = 2,
+            RightY = 3,
+            LeftTrigger = 4,
+            RightTrigger = 5
         };
     }
 }
