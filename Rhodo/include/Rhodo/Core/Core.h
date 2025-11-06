@@ -2,7 +2,7 @@
 
 
 // ReSharper disable once CppUnusedIncludeDirective
-#include "Rhodo/Core/PlatformDetection.h"
+#include "Core/PlatformDetection.h"
 #include <memory>
 
 //-----------Export/Import Macro-----------

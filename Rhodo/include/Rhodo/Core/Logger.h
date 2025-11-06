@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "Rhodo/Core/Core.h"
+#include "Core.h"
 #include "spdlog/spdlog.h"
 
 
