@@ -1,18 +1,1 @@
-[submodule "Rhodo/external/spdlog"]
-	path = Rhodo/external/spdlog
-	url = https://github.com/gabime/spdlog.git
-[submodule "Rhodo/external/glm"]
-	path = Rhodo/external/glm
-	url = https://github.com/g-truc/glm.git
-	branch = master
-[submodule "Rhodo/external/glfw"]
-	path = Rhodo/external/glfw
-	url = https://github.com/glfw/glfw.git
-	branch = master
-[submodule "Rhodo/external/imgui"]
-	path = Rhodo/external/imgui
-	url = https://github.com/ocornut/imgui.git
-	branch = docking
-[submodule "Rhodo/external/glad"]
-	path = Rhodo/external/glad
-	url = https://github.com/Dav1dde/glad.git
+
