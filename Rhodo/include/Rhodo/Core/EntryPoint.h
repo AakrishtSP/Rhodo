@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Rhodo/Core/Core.h"
-#include "Rhodo/Core/Application.h"
 #include "Rhodo/Core/Logger.h"
 
 int main(int argc, char **argv) {
@@ -20,8 +19,4 @@ int main(int argc, char **argv) {
 #else
 	RH_CORE_INFO("Running on an unknown platform");
 #endif
-
-	const Rhodo::Application *app = Rhodo::createApplication();
-	app->run();
-	delete app;
 }

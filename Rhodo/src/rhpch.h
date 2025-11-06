@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Rhodo/Core/PlatformDetection.h"
+#include "../include/Rhodo/Core/PlatformDetection.h"
 
 #include <iostream>
 #include <memory>
@@ -18,5 +18,5 @@
 #include <unordered_set>
 
 
-#include "Rhodo/Core/Core.h"
-#include "Rhodo/Core/Logger.h"
+#include "../include/Rhodo/Core/Core.h"
+#include "../include/Rhodo/Core/Logger.h"

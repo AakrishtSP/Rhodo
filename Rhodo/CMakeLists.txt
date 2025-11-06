@@ -1,53 +1,82 @@
-# CMake: RhodoEngine->Rhodo
+# Rhodo Engine Library
 
-project(Rhodo)
-
-# Recursively find all .cpp and .h files in the src directory
-file(GLOB_RECURSE SOURCES
+# Collect source files
+file(GLOB_RECURSE RHODO_SOURCES
         src/*.cpp
         src/*.h
+        include/*.h
 )
 
-# Define the Rhodo dynamic library
-#add_library(${PROJECT_NAME} SHARED ${SOURCES} include/Rhodo.h)
-add_library(${PROJECT_NAME} STATIC ${SOURCES} include/Rhodo.h)
+# Create static library
+add_library(Rhodo STATIC
+        ${RHODO_SOURCES}
+)
 
-# Add GLM as a submodule
+# --------------------------------------------------------------------------
+# Fetch spdlog (latest stable)
+# --------------------------------------------------------------------------
+FetchContent_Declare(
+        spdlog
+        GIT_REPOSITORY https://github.com/gabime/spdlog.git
+        GIT_TAG v1.16.0  # replace with desired version
+)
+
+FetchContent_MakeAvailable(spdlog)
+
+# Add external dependencies
 add_subdirectory(external/glm glm_build)
-
-# Add GLFW
 add_subdirectory(external/glfw glfw_build)
 
 # Add Glad2
 add_subdirectory(external/glad/cmake glad_build)
 glad_add_library(glad_gl STATIC REPRODUCIBLE LOADER API gl:core=4.6)
 
-# Add include directories for Rhodo
-target_include_directories(${PROJECT_NAME}
-        PUBLIC src
-        PUBLIC ${CMAKE_SOURCE_DIR}/Rhodo/external/spdlog/include  # Include spdlog
-        PUBLIC ${CMAKE_SOURCE_DIR}/Rhodo/external/glm  # Include glm
-        PUBLIC ${CMAKE_SOURCE_DIR}/Rhodo/external/glfw/include  # Include GLFW
-        PUBLIC ${CMAKE_SOURCE_DIR}/Rhodo/external/glad/include # Include Glad
-        PUBLIC ${CMAKE_BINARY_DIR}/Rhodo/gladsources/glad_gl/include # Include Glad generated files
-        INTERFACE include
+# Include directories
+target_include_directories(Rhodo
+        PUBLIC
+        # For consumers of the library (Examples, etc.)
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+        PRIVATE
+        # Internal implementation details
+        /src
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+#        ${CMAKE_CURRENT_SOURCE_DIR}/external/spdlog/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/glfw/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/glad/include
+        ${CMAKE_BINARY_DIR}/Rhodo/gladsources/glad_gl/include
 )
 
-target_precompile_headers(${PROJECT_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/Rhodo/src/rhpch.h")
-
-target_link_libraries(${PROJECT_NAME}
-        PRIVATE glfw
-        PRIVATE glad_gl
+# Precompiled headers
+target_precompile_headers(Rhodo PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/rhpch.h"
 )
 
-# Add defines for Rhodo
-#target_compile_definitions(${PROJECT_NAME} PRIVATE RH_BUILD_SHARED)
-target_compile_definitions(${PROJECT_NAME} PRIVATE RH_BUILD_STATIC)
-
-# Custom output paths for Rhodo
-set_target_properties(${PROJECT_NAME} PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/bin/${PLATFORM}/${PROJECT_NAME}
-        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/obj/${PLATFORM}/${PROJECT_NAME}
-        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/lib/${PLATFORM}/${PROJECT_NAME}
+# Link libraries
+target_link_libraries(Rhodo
+        PRIVATE
+        glfw
+        glad_gl
+        spdlog::spdlog
+        PUBLIC
+        glm::glm
 )
 
+# Build configuration defines (works with both single-config and multi-config generators)
+target_compile_definitions(Rhodo
+        PRIVATE
+        RH_BUILD_STATIC
+
+
+        # Debug configuration
+        $<$<CONFIG:Debug>:RH_DEBUG;RH_ENABLE_LOGGING;RH_ENABLE_ASSERTS;RH_ENABLE_EVENT_NAMES>
+        # Release with debug info configuration
+        $<$<CONFIG:RelWithDebInfo>:RH_RELEASE;RH_ENABLE_LOGGING;RH_ENABLE_EVENT_NAMES>
+        # Release configuration
+        $<$<CONFIG:Release>:RH_RELEASE>
+        # MinSizeRel configuration
+        $<$<CONFIG:MinSizeRel>:RH_RELEASE>
+)
+
+# Set output directories
+set_target_output_dirs(Rhodo)
