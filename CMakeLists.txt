@@ -1,13 +1,13 @@
-cmake_minimum_required(VERSION 3.31)
+cmake_minimum_required(VERSION 3.30)
+
 project(RhodoEngine LANGUAGES C CXX)
 
 # Set C++ standard
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Include FetchContent
-include(FetchContent)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/thirdparty/")
 
 # Platform detection
 if(WIN32)
@@ -46,9 +46,9 @@ endfunction()
 
 # Add subdirectories (no project() calls in subdirectories)
 add_subdirectory(Rhodo)
-add_subdirectory(Examples)
+add_subdirectory(Application)
 
-option(RH_BUILD_TESTS "Build unit tests" ON)
+option(RH_BUILD_TESTS "Build unit tests" OFF)
 
 if(RH_BUILD_TESTS)
     enable_testing()

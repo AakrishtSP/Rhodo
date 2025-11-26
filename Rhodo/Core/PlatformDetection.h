@@ -1,9 +1,4 @@
-//
-// Created by asp on 1/23/2025.
-//
 #pragma once
-
-// Platform detection using predefined macros
 
 //-----------Windows-----------
 
