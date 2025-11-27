@@ -1,7 +1,7 @@
-add_library(TestsRhodoSignals STATIC SignalTests.cpp)
+add_library(TestsRhodoSignals OBJECT SignalTests.cpp)
 
 target_link_libraries(TestsRhodoSignals
     PUBLIC
-        Catch2::Catch2
         Rhodo
+        Catch2::Catch2
 )

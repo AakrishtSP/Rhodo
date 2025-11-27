@@ -9,9 +9,9 @@ add_subdirectory(Rhodo)
 add_executable(RhodoTests)
 
 target_link_libraries(RhodoTests
-        PRIVATE
+    PRIVATE
         TestsApplication
-        TestsRhodo
+        TestsRhodoSignals
         Rhodo
         Catch2::Catch2WithMain
 )

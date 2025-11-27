@@ -1,8 +1,6 @@
-add_library(TestsApplication STATIC)
+add_library(TestsApplication OBJECT ApplicationTests.cpp)
 
-target_sources(TestsApplication
-    PRIVATE
-    ApplicationTests.cpp
+target_link_libraries(TestsApplication
+    PUBLIC
+        Catch2::Catch2
 )
-
-target_include_directories(TestsApplication PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
