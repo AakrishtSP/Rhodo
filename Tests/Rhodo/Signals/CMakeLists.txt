@@ -1,10 +1,7 @@
-add_library(TestsRhodoSignals STATIC)
+add_library(TestsRhodoSignals STATIC SignalTests.cpp)
 
-target_sources(TestsRhodoSignals
+target_link_libraries(TestsRhodoSignals
     PUBLIC
-        SignalTests.cpp
-    PRIVATE
-
+        Catch2::Catch2
+        Rhodo
 )
-
-target_include_directories(TestsRhodoSignals PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

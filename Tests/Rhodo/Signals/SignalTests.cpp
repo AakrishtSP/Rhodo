@@ -1,23 +1,14 @@
-// Tests/SignalTests.cpp
-// tests/SignalTests.cpp
-#define CATCH_CONFIG_MAIN
+// #define CATCH_CONFIG_MAIN
 #include <catch2/catch_all.hpp>
 
-#include <Rhodo/Signals/Signals.hpp>
-#include <thread>
-#include <vector>
 #include <atomic>
+#include <thread>
 #include <chrono>
-#include <sstream>
+import Rhodo.Signals;
 
 using namespace Rhodo;
 using namespace std::chrono_literals;
 
-// At the top of any .cpp test file (outside any function)
-[[maybe_unused]] static struct LoggerInit {
-    LoggerInit()  { Logger::init(); }
-    ~LoggerInit() { Logger::shutdown(); }
-} g_LoggerInit;
 
 // -----------------------------------------------------------------------------
 // Helper utilities
@@ -26,7 +17,7 @@ template<typename T>
 struct Counter {
     std::atomic<T> value{0};
     void operator()(T v) { value.fetch_add(v, std::memory_order_relaxed); }
-    T get() const { return value.load(std::memory_order_relaxed); }
+    [[nodiscard]] T get() const { return value.load(std::memory_order_relaxed); }
 };
 
 // -----------------------------------------------------------------------------
@@ -53,7 +44,7 @@ TEST_CASE("ScopedConnection auto-disconnects", "[ScopedConnection]") {
     int count = 0;
 
     {
-        auto conn = Signals::make_scoped_connection(sig, std::function<void()>{ [&count] { ++count; } });
+        [[maybe_unused]] auto conn = Signals::make_scoped_connection(sig, std::function<void()>{ [&count] { ++count; } });
         sig.emit();
         REQUIRE(count == 1);
     }                                   // conn destroyed here

@@ -25,9 +25,9 @@ endif()
 function(set_target_output_dirs target_name)
     # Base directories for single-config generators
     set_target_properties(${target_name} PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/bin/${RH_PLATFORM}/${target_name}
-        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/lib/${RH_PLATFORM}/${target_name}
-        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/obj/${RH_PLATFORM}/${target_name}
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/${target_name}
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/${target_name}
+        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/obj/${target_name}
     )
     
     # Per-configuration directories for multi-config generators
@@ -35,11 +35,11 @@ function(set_target_output_dirs target_name)
         string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG_UPPER)
         set_target_properties(${target_name} PROPERTIES
             RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG_UPPER} 
-                ${CMAKE_BINARY_DIR}/build/bin/${RH_PLATFORM}/${target_name}/${OUTPUTCONFIG}
+                ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}/bin/${target_name}
             LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG_UPPER} 
-                ${CMAKE_BINARY_DIR}/build/lib/${RH_PLATFORM}/${target_name}/${OUTPUTCONFIG}
+                ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}/lib/${target_name}
             ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG_UPPER} 
-                ${CMAKE_BINARY_DIR}/build/obj/${RH_PLATFORM}/${target_name}/${OUTPUTCONFIG}
+                ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}/obj/${target_name}
         )
     endforeach()
 endfunction()
@@ -48,9 +48,10 @@ endfunction()
 add_subdirectory(Rhodo)
 add_subdirectory(Application)
 
-option(RH_BUILD_TESTS "Build unit tests" OFF)
+option(RH_BUILD_TESTS "Build unit tests" ON)
 
 if(RH_BUILD_TESTS)
+    message("Building unit tests...")
     enable_testing()
     add_subdirectory(Tests)
 endif()
