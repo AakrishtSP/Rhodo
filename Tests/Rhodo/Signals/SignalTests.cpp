@@ -147,7 +147,7 @@ TEST_CASE("Signal concurrent emit is safe", "[Signal][thread]") {
 
     sig.connect([&total](int x) { total(x); });
 
-    const int N = 100'000;
+    constexpr int N = 100'000;
     std::vector<std::thread> threads;
     for (int i = 0; i < 4; ++i) {
         threads.emplace_back([&sig, N]{
@@ -192,17 +192,17 @@ TEST_CASE("Signal batched cleanup respects threshold", "[Signal]") {
     Signal<> sig;
     constexpr uint32_t THRESH = Signal<>::cleanup_threshold;
 
-    std::vector<Signal<>::slot_id> ids;
+    std::vector<slot_id> ids;
     for (uint32_t i = 0; i < THRESH * 2; ++i) {
         ids.push_back(sig.connect([]{}));
     }
 
-    // Disconnect half + 1 → should trigger cleanup on next emit
+    // Disconnect half + 1 → should trigger cleanup on the next emit
     for (uint32_t i = 0; i < THRESH + 1; ++i) {
         sig.disconnect(ids[i]);
     }
 
-    // Force an emit → guard will cleanup
+    // Force an emit → guard will clean up
     sig.emit();
 
     // After cleanup, slots_ should contain only active ones
@@ -228,7 +228,7 @@ TEST_CASE("Signal force_cleanup removes dead slots immediately", "[Signal]") {
 TEST_CASE("SignalHub get/create/remove", "[SignalHub]") {
     auto& hub = Signals::global();
 
-    auto& s1 = hub.get<int>("test");
+    [[maybe_unused]]auto& s1 = hub.get<int>("test");
     REQUIRE(Signals::has<int>("test"));
     REQUIRE(hub.size() == 1);
 

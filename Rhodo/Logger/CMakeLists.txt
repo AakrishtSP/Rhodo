@@ -19,9 +19,6 @@ target_sources(RhodoLogger
         PUBLIC
         FILE_SET CXX_MODULES BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} FILES
         Logger.cppm
-
-        PRIVATE
-        Logger.cpp
 )
 
 target_link_libraries(RhodoLogger
