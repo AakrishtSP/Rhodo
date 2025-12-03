@@ -1,16 +1,32 @@
 add_library(RhodoLogger STATIC)
 
+set(QUILL_NO_EXCEPTIONS ON)
+set(QUILL_DISABLE_NON_PREFIXED_MACROS ON)
+set(QUILL_DISABLE_FUNCTION_NAME ON)
+set(QUILL_DISABLE_FILE_INFO ON)
+set(QUILL_IMMEDIATE_FLUSH 0)
+
+if (${CMAKE_BUILD_TYPE} STREQUAL "Debug" OR ${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo")
+    set(QUILL_ENABLE_ASSERTIONS ON)
+    set(QUILL_COMPILE_ACTIVE_LOG_LEVEL QUILL_COMPILE_ACTIVE_LOG_LEVEL_DEBUG)
+else ()
+    set(QUILL_COMPILE_ACTIVE_LOG_LEVEL QUILL_COMPILE_ACTIVE_LOG_LEVEL_WARNING)
+endif ()
+
 include(${CMAKE_SOURCE_DIR}/thirdparty/Quill/Quill.cmake)
 
 target_sources(RhodoLogger
-PUBLIC
-    FILE_SET CXX_MODULES BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} FILES
-            Logger.cppm
+        PUBLIC
+        FILE_SET CXX_MODULES BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} FILES
+        Logger.cppm
+
+        PRIVATE
+        Logger.cpp
 )
 
 target_link_libraries(RhodoLogger
-PRIVATE
-    quill::quill
+        PRIVATE
+        quill::quill
 )
 
 target_include_directories(RhodoLogger PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

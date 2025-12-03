@@ -9,6 +9,17 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/thirdparty/")
 
+if(${CMAKE_BUILD_TYPE} STREQUAL "")
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type" FORCE)
+endif()
+
+
+if(${CMAKE_BUILD_TYPE} STREQUAL "Debug" OR ${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo")
+    message("Enabling Rhodo assertions...")
+    add_compile_definitions(RH_ENABLE_ASSERTS)
+    set(RH_ENABLE_ASSERTS TRUE CACHE INTERNAL "")
+endif()
+
 # Platform detection
 if(WIN32)
     set(RH_PLATFORM "Windows" CACHE INTERNAL "")
