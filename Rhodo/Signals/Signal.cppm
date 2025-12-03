@@ -1,22 +1,58 @@
 module;
+#include <algorithm>
+#include <atomic>
+#include <deque>
 #include <functional>
 #include <memory>
-#include <string>
-#include <deque>
-#include <algorithm>
 #include <mutex>
 #include <shared_mutex>
-#include <atomic>
 
-export module Rhodo.Signals.Signal;
+export module Rhodo.Signals:Signal;
 
 
 export namespace Rhodo
 {
+    using slot_id = uint64_t;
+
     template <typename... Args>
     class Signal
     {
+    public:
+
+        static constexpr uint32_t cleanup_threshold = 16;
+        auto next_id() const -> uint64_t ;
+
+        // Connect - WRITE operation
+        template <typename T>
+        auto connect(T &obj, void (T::*method)(Args...)) -> slot_id ;
+        auto connect(std::function<void(Args...)> callback) -> slot_id ;
+
+        // Disconnect - WRITE
+        auto disconnect(slot_id id) -> void ;
+        auto disconnect_all() noexcept -> void ;
+
+        // Emit signal - READ operation
+        template <typename... A>
+        auto emit(A &&... args) -> void ;
+        template <typename... A>
+        auto blocking_emit(A &&... args) -> void ;
+
+        // Operator() as alias for emit
+        template <typename... A>
+        auto operator()(A &&... args) -> void ;
+
+        // Query
+        [[nodiscard]] auto size() const noexcept -> size_t ; // ACTIVE slots
+        [[nodiscard]] auto container_size() const noexcept -> size_t ; // slots incl inactive waiting for cleanup
+        [[nodiscard]] auto empty() const noexcept -> bool ;
+
+        // Clear all slots - WRITE operation
+        auto clear() noexcept -> void ;
+        auto force_cleanup() -> void ;
+
     private:
+        auto cleanup_internal() noexcept -> void ;
+
         struct Slot
         {
             std::function<void(Args...)> callback;
@@ -30,212 +66,185 @@ export namespace Rhodo
         std::atomic<uint32_t> disconnect_count_{0};
         std::atomic<bool> needs_cleanup_{false};
         mutable std::shared_mutex mutex_;
+    };
 
-    public:
-        static constexpr uint32_t CLEANUP_THRESHOLD = 16;
+    template<typename ... Args>
+    auto Signal<Args...>::next_id() const -> uint64_t { return next_id_.load(); }
 
-        uint64_t next_id() const { return next_id_.load(); }
-
-        // For testing only
-        std::atomic<uint64_t>& _test_next_id_() { return next_id_; }
-
-        using SlotID = uint64_t;
-
-        // Connect a callback - WRITE operation
-        SlotID connect(std::function<void(Args...)> callback)
+    template<typename ... Args>
+    template<typename T>
+    auto Signal<Args...>::connect(T &obj, void(T::*method)(Args...)) -> slot_id {
+        return connect([&obj, method](Args&&... args)
         {
-            std::unique_lock lock(mutex_);
+            (obj.*method)(std::forward<Args>(args)...);
+        });
+    }
 
-            SlotID id = next_id_.fetch_add(1, std::memory_order_relaxed);
+    template<typename ... Args>
+    auto Signal<Args...>::connect(std::function<void(Args...)> callback) -> slot_id {
+        std::unique_lock lock(mutex_);
 
-            // Guard against overflow (wrap to 1, skip 0 as reserved)
-            if (id == 0)
-            {
-                id = 1;
-                next_id_.store(2, std::memory_order_relaxed);
-            }
+        slot_id id = next_id_.fetch_add(1, std::memory_order_relaxed);
 
-            slots_.push_back({std::move(callback), id, true});
-            return id;
+        // Guard against overflow (wrap to 1, skip 0 as reserved)
+        if (id == 0)
+        {
+            id = 1;
+            next_id_.store(2, std::memory_order_relaxed);
         }
 
-        // Connect member function - WRITE operation
-        // WARNING: Object must outlive the signal or be disconnected before destruction
-        template <typename T>
-        SlotID connect(T& obj, void (T::*method)(Args...))
+        slots_.push_back({std::move(callback), id, true});
+        return id;
+    }
+
+    template<typename ... Args>
+    auto Signal<Args...>::disconnect(slot_id id) -> void {
+        std::unique_lock lock(mutex_);
+
+        for (auto& slot : slots_)
         {
-            return connect([&obj, method](Args&&... args)
-            {
-                (obj.*method)(std::forward<Args>(args)...);
-            });
-        }
-
-
-        // Disconnect by ID - WRITE operation with batched cleanup
-        void disconnect(SlotID id)
-        {
-            std::unique_lock lock(mutex_);
-
-            for (auto& slot : slots_)
-            {
-                if (slot.id == id && slot.active)
-                {
-                    slot.active = false;
-
-                    uint32_t count = disconnect_count_.fetch_add(1, std::memory_order_relaxed) + 1;
-
-                    // Trigger cleanup if threshold reached
-                    if (count >= CLEANUP_THRESHOLD)
-                    {
-                        needs_cleanup_.store(true, std::memory_order_release);
-                    }
-                    else
-                    {
-                    }
-                    return;
-                }
-            }
-
-        }
-
-        // Disconnect all slots - WRITE operation
-        void disconnect_all() noexcept
-        {
-            std::unique_lock lock(mutex_);
-            for (auto& slot : slots_)
+            if (slot.id == id && slot.active)
             {
                 slot.active = false;
-            }
-            disconnect_count_.store(static_cast<uint32_t>(slots_.size()), std::memory_order_relaxed);
-            needs_cleanup_.store(true, std::memory_order_release);
-        }
 
-        // Emit signal - READ operation (multiple threads can emit concurrently!)
-        template <typename... A>
-        void emit(A&&... args)
-        {
-            {
-                std::shared_lock lock(mutex_);
-
-                // Call all active slots - use const& to avoid moving args
-                for (const auto& slot : slots_)
+                // Trigger cleanup if the threshold reached
+                if (const uint32_t count = disconnect_count_.fetch_add(1, std::memory_order_relaxed) + 1; count >= cleanup_threshold)
                 {
-                    if (slot.active)
-                    {
-                        try
-                        {
-                            slot.callback(args...);
-                        }
-                        catch (...)
-                        {
-                            // Swallow exceptions to prevent one slot from breaking others
-                        }
-                    }
+                    needs_cleanup_.store(true, std::memory_order_release);
                 }
-            }
-
-            // After releasing shared lock, check if cleanup is needed
-            // Only one thread will successfully perform cleanup due to the atomic exchange
-            if (needs_cleanup_.load(std::memory_order_acquire))
-            {
-                std::unique_lock lock(mutex_);
-                // Double-check after acquiring lock
-                if (needs_cleanup_.exchange(false, std::memory_order_acq_rel))
+                else
                 {
-                    cleanup_internal();
                 }
+                return;
             }
         }
 
-        // Blocking emit - WRITE operation (waits for all callbacks to complete)
-        // Useful for shutdown sequences or when you need guaranteed delivery
-        template <typename... A>
-        void blocking_emit(A&&... args)
-        {
-            std::unique_lock lock(mutex_);
+    }
 
+    template<typename ... Args>
+    auto Signal<Args...>::disconnect_all() noexcept -> void {
+        std::unique_lock lock(mutex_);
+        for (auto& slot : slots_)
+        {
+            slot.active = false;
+        }
+        disconnect_count_.store(static_cast<uint32_t>(slots_.size()), std::memory_order_relaxed);
+        needs_cleanup_.store(true, std::memory_order_release);
+    }
+
+    template<typename ... Args>
+    template<typename ... A>
+    auto Signal<Args...>::emit(A &&...args) -> void {
+        {
+            std::shared_lock lock(mutex_);
+
+            // Call all active slots - use const& to avoid moving args
             for (const auto& slot : slots_)
             {
                 if (slot.active)
                 {
                     try
                     {
-                        slot.callback(std::forward<A>(args)...);
+                        slot.callback(args...);
                     }
                     catch (...)
                     {
+                        // Swallow exceptions to prevent one slot from breaking others
                     }
                 }
             }
+        }
 
-            // Perform cleanup if needed
+        // After releasing the shared lock, check if cleanup is needed
+        // Only one thread will successfully perform cleanup due to the atomic exchange
+        if (needs_cleanup_.load(std::memory_order_acquire))
+        {
+            std::unique_lock lock(mutex_);
+            // Double-check after acquiring a lock
             if (needs_cleanup_.exchange(false, std::memory_order_acq_rel))
             {
                 cleanup_internal();
             }
         }
+    }
 
-        // Operator() as alias for emit
-        template <typename... A>
-        void operator()(A&&... args)
-        {
-            emit(std::forward<A>(args)...);
-        }
+    template<typename ... Args>
+    template<typename ... A>
+    auto Signal<Args...>::blocking_emit(A &&...args) -> void {
+        std::unique_lock lock(mutex_);
 
-        // Query - READ operation
-        // Returns count of ACTIVE slots (not total slots in container)
-        [[nodiscard]] size_t size() const noexcept
+        for (const auto& slot : slots_)
         {
-            std::shared_lock lock(mutex_);
-            size_t count = 0;
-            for (const auto& slot : slots_)
+            if (slot.active)
             {
-                if (slot.active) ++count;
+                try
+                {
+                    slot.callback(std::forward<A>(args)...);
+                }
+                catch (...)
+                {
+                }
             }
-            return count;
         }
 
-        // Returns total slots in container (including inactive ones waiting for cleanup)
-        [[nodiscard]] size_t container_size() const noexcept
+        // Perform cleanup if needed
+        if (needs_cleanup_.exchange(false, std::memory_order_acq_rel))
         {
-            std::shared_lock lock(mutex_);
-            size_t sz = slots_.size();
-            return sz;
-        }
-
-        [[nodiscard]] bool empty() const noexcept
-        {
-            return size() == 0;
-        }
-
-        // Clear all slots - WRITE operation
-        void clear() noexcept
-        {
-            std::unique_lock lock(mutex_);
-            slots_.clear();
-            needs_cleanup_.store(false, std::memory_order_relaxed);
-            disconnect_count_.store(0, std::memory_order_relaxed);
-        }
-
-        // Force immediate cleanup - WRITE operation
-        void force_cleanup()
-        {
-            std::unique_lock lock(mutex_);
             cleanup_internal();
         }
+    }
 
-    private:
-        void cleanup_internal() noexcept
+    template<typename ... Args>
+    template<typename ... A>
+    auto Signal<Args...>::operator()(A &&...args) -> void {
+        emit(std::forward<A>(args)...);
+    }
+
+    template<typename ... Args>
+    auto Signal<Args...>::size() const noexcept -> size_t {
+        std::shared_lock lock(mutex_);
+        size_t count = 0;
+        for (const auto& slot : slots_)
         {
-            size_t before = slots_.size();
-            slots_.erase(
-                std::remove_if(slots_.begin(), slots_.end(),
-                               [](const Slot& s) noexcept { return !s.active; }),
-                slots_.end()
-            );
-            size_t after = slots_.size();
-            needs_cleanup_.store(false, std::memory_order_release);
-            disconnect_count_.store(0, std::memory_order_relaxed);
+            if (slot.active) ++count;
         }
-    };
-} 
+        return count;
+    }
+
+    template<typename ... Args>
+    auto Signal<Args...>::container_size() const noexcept -> size_t {
+        std::shared_lock lock(mutex_);
+        const size_t sz = slots_.size();
+        return sz;
+    }
+
+    template<typename ... Args>
+    auto Signal<Args...>::empty() const noexcept -> bool {
+        return size() == 0;
+    }
+
+    template<typename ... Args>
+    auto Signal<Args...>::clear() noexcept -> void {
+        std::unique_lock lock(mutex_);
+        slots_.clear();
+        needs_cleanup_.store(false, std::memory_order_relaxed);
+        disconnect_count_.store(0, std::memory_order_relaxed);
+    }
+
+    template<typename ... Args>
+    auto Signal<Args...>::force_cleanup() -> void {
+        std::unique_lock lock(mutex_);
+        cleanup_internal();
+    }
+
+    template<typename ... Args>
+    auto Signal<Args...>::cleanup_internal() noexcept -> void {
+        slots_.erase(
+            std::remove_if(slots_.begin(), slots_.end(),
+                           [](const Slot& s) noexcept { return !s.active; }),
+            slots_.end()
+        );
+        needs_cleanup_.store(false, std::memory_order_release);
+        disconnect_count_.store(0, std::memory_order_relaxed);
+    }
+}

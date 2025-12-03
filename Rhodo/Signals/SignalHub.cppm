@@ -1,145 +1,149 @@
 module;
-#include <string>
-#include <unordered_map>
-#include <typeindex>
 #include <memory>
-#include <shared_mutex>
 #include <mutex>
+#include <shared_mutex>
+#include <string>
+#include <typeindex>
+#include <unordered_map>
 
+export module Rhodo.Signals:SignalHub;
 
-export module Rhodo.Signals.SignalHub;
-
-
-import Rhodo.Signals.Signal;
+import :Signal;
 
 export namespace Rhodo
 {
     class SignalHub
     {
+    public:
+        template <typename... Args>
+        auto get(const std::string &name) -> Signal<Args...> & ;
+
+        template <typename... Args>
+        void remove(const std::string& name);
+
+        auto clear() noexcept -> void ;
+        auto cleanup_empty_signals() -> void ;
+
+        template <typename... Args>
+        [[nodiscard]] auto has(const std::string &name) const noexcept -> bool ;
+
+        [[nodiscard]] auto size() const noexcept -> size_t ;
     private:
         struct SignalKey
         {
             std::string name;
             std::type_index type;
 
-            bool operator==(const SignalKey& other) const noexcept
-            {
-                return name == other.name && type == other.type;
-            }
+            auto operator==(const SignalKey &other) const noexcept -> bool ;
         };
 
         struct SignalKeyHash
         {
-            size_t operator()(const SignalKey& key) const noexcept
-            {
-                // Improved hash combination using golden ratio
-                size_t h1 = std::hash<std::string>{}(key.name);
-                size_t h2 = std::hash<std::type_index>{}(key.type);
-                return h1 ^ (h2 + 0x9e3779b9 + (h1 << 6) + (h1 >> 2));
-            }
+            auto operator()(const SignalKey &key) const noexcept -> size_t ;
         };
 
         struct ISignalHolder
         {
-            virtual ~ISignalHolder() = default;
-            [[nodiscard]] virtual bool is_empty() const noexcept = 0;
+            virtual ~ISignalHolder();
+            [[nodiscard]] virtual auto is_empty() const noexcept -> bool = 0;
         };
 
         template <typename... Args>
-        struct SignalHolder : ISignalHolder
+        struct SignalHolder final : ISignalHolder
         {
-            Signal<Args...> signal;
+            Signal<Args...> signal{};
 
-            [[nodiscard]] bool is_empty() const noexcept override
-            {
-                return signal.empty();
-            }
+            [[nodiscard]] auto is_empty() const noexcept -> bool override;
         };
 
         std::unordered_map<SignalKey, std::unique_ptr<ISignalHolder>, SignalKeyHash> signals_;
         mutable std::shared_mutex mutex_;
 
-    public:
-        // Get or create a signal - uses double-checked locking pattern
-        template <typename... Args>
-        Signal<Args...>& get(const std::string& name)
+
+    };
+
+    template<typename ... Args>
+    auto SignalHub::get(const std::string &name) -> Signal<Args...> & {
+        const SignalKey key{name, std::type_index(typeid(Signal<Args...>))};
+
+        // Fast path: READ lock for existing signals
         {
-            // Use Signal type itself for reliable ODR-safe matching across TUs
-            SignalKey key{name, std::type_index(typeid(Signal<Args...>))};
-
-            // Fast path: READ lock for existing signals
-            {
-                std::shared_lock read_lock(mutex_);
-                auto it = signals_.find(key);
-                if (it != signals_.end())
-                {
-                    return static_cast<SignalHolder<Args...>&>(*it->second).signal;
-                }
-            }
-
-            // Slow path: WRITE lock to create signal
-            std::unique_lock write_lock(mutex_);
-
-            // Double-check: another thread might have created it
-            auto it = signals_.find(key);
-            if (it != signals_.end())
+            std::shared_lock readLock(mutex_);
+            if (const auto it = signals_.find(key); it != signals_.end())
             {
                 return static_cast<SignalHolder<Args...>&>(*it->second).signal;
             }
-
-            auto holder = std::make_unique<SignalHolder<Args...>>();
-            auto& signal_ref = holder->signal;
-            signals_[key] = std::move(holder);
-            return signal_ref;
         }
 
-        // Check if signal exists - READ operation
-        template <typename... Args>
-        [[nodiscard]] bool has(const std::string& name) const noexcept
+        // Slow path: WRITE lock to create a signal
+        std::unique_lock writeLock(mutex_);
+
+        // Double-check: another thread might have created it
+        if (const auto it = signals_.find(key); it != signals_.end())
         {
-            std::shared_lock lock(mutex_);
-            SignalKey key{name, std::type_index(typeid(Signal<Args...>))};
-            return signals_.contains(key);
+            return static_cast<SignalHolder<Args...>&>(*it->second).signal;
         }
 
-        // Remove a signal - WRITE operation
-        template <typename... Args>
-        void remove(const std::string& name)
-        {
-            std::unique_lock lock(mutex_);
-            SignalKey key{name, std::type_index(typeid(Signal<Args...>))};
-            signals_.erase(key);
-        }
+        auto holder = std::make_unique<SignalHolder<Args...>>();
+        auto& signalRef = holder->signal;
+        signals_[key] = std::move(holder);
+        return signalRef;
+    }
 
-        // Clear all signals - WRITE operation
-        void clear() noexcept
-        {
-            std::unique_lock lock(mutex_);
-            signals_.clear();
-        }
+    template<typename ... Args>
+    void SignalHub::remove(const std::string &name) {
+        std::unique_lock lock(mutex_);
+        const SignalKey key{name, std::type_index(typeid(Signal<Args...>))};
+        signals_.erase(key);
+    }
 
-        // Cleanup empty signals - WRITE operation
-        void cleanup_empty_signals()
+    auto SignalHub::clear() noexcept -> void {
+        std::unique_lock lock(mutex_);
+        signals_.clear();
+    }
+
+    auto SignalHub::cleanup_empty_signals() -> void {
+        std::unique_lock lock(mutex_);
+        for (auto it = signals_.begin(); it != signals_.end();)
         {
-            std::unique_lock lock(mutex_);
-            for (auto it = signals_.begin(); it != signals_.end();)
+            if (it->second->is_empty())
             {
-                if (it->second->is_empty())
-                {
-                    it = signals_.erase(it);
-                }
-                else
-                {
-                    ++it;
-                }
+                it = signals_.erase(it);
+            }
+            else
+            {
+                ++it;
             }
         }
+    }
 
-        // Get count - READ operation
-        [[nodiscard]] size_t size() const noexcept
-        {
-            std::shared_lock lock(mutex_);
-            return signals_.size();
-        }
-    };
+    template<typename ... Args>
+    auto SignalHub::has(const std::string &name) const noexcept -> bool {
+        std::shared_lock lock(mutex_);
+        const SignalKey key{name, std::type_index(typeid(Signal<Args...>))};
+        return signals_.contains(key);
+    }
+
+    auto SignalHub::size() const noexcept -> size_t {
+        std::shared_lock lock(mutex_);
+        return signals_.size();
+    }
+
+    auto SignalHub::SignalKey::operator==(const SignalKey &other) const noexcept -> bool {
+        return name == other.name && type == other.type;
+    }
+
+    auto SignalHub::SignalKeyHash::operator()(const SignalKey &key) const noexcept -> size_t {
+        // Improved hash combination using the golden ratio
+        const size_t h1 = std::hash<std::string>{}(key.name);
+        const size_t h2 = std::hash<std::type_index>{}(key.type);
+        return h1 ^ (h2 + 0x9e3779b9 + (h1 << 6) + (h1 >> 2));
+    }
+
+    SignalHub::ISignalHolder::~ISignalHolder() = default;
+
+    template<typename ... Args>
+    auto SignalHub::SignalHolder<Args...>::is_empty() const noexcept -> bool {
+        return signal.empty();
+    }
 }

@@ -66,143 +66,143 @@ namespace Rhodo::Logger {
     }
 
     // -------------------- Normal logging --------------------
-    void trace_l3(const char *fmt, auto &&... args) {
+    auto trace_l3(const char *fmt, auto &&... args) -> void {
         if (appLogger) [[likely]]
                 QUILL_LOG(appLogger, quill::LogLevel::TraceL3, fmt, std::forward<decltype(args)>(args)...);
     }
 
-    void trace_l2(const char *fmt, auto &&... args) {
+    auto trace_l2(const char *fmt, auto &&... args) -> void {
         if (appLogger) [[likely]]
                 QUILL_LOG(appLogger, quill::LogLevel::TraceL2, fmt, std::forward<decltype(args)>(args)...);
     }
 
-    void trace_l1(const char *fmt, auto &&... args) {
+    auto trace_l1(const char *fmt, auto &&... args) -> void {
         if (appLogger) [[likely]]
                 QUILL_LOG(appLogger, quill::LogLevel::TraceL1, fmt, std::forward<decltype(args)>(args)...);
     }
 
-    void debug(const char *fmt, auto &&... args) {
+    auto debug(const char *fmt, auto &&... args) -> void {
         if (appLogger) [[likely]]
                 QUILL_LOG(appLogger, quill::LogLevel::Debug, fmt, std::forward<decltype(args)>(args)...);
     }
 
-    void info(const char *fmt, auto &&... args) {
+    auto info(const char *fmt, auto &&... args) -> void {
         if (appLogger) [[likely]]
                 QUILL_LOG(appLogger, quill::LogLevel::Info, fmt, std::forward<decltype(args)>(args)...);
     }
 
-    void notice(const char *fmt, auto &&... args) {
+    auto notice(const char *fmt, auto &&... args) -> void {
         if (appLogger) [[likely]]
                 QUILL_LOG(appLogger, quill::LogLevel::Notice, fmt, std::forward<decltype(args)>(args)...);
     }
 
-    void warn(const char *fmt, auto &&... args) {
+    auto warn(const char *fmt, auto &&... args) -> void {
         if (appLogger) [[likely]]
                 QUILL_LOG(appLogger, quill::LogLevel::Warning, fmt, std::forward<decltype(args)>(args)...);
     }
 
-    void error(const char *fmt, auto &&... args) {
+    auto error(const char *fmt, auto &&... args) -> void {
         if (appLogger) [[likely]]
                 QUILL_LOG(appLogger, quill::LogLevel::Error, fmt, std::forward<decltype(args)>(args)...);
     }
 
-    void critical(const char *fmt, auto &&... args) {
+    auto critical(const char *fmt, auto &&... args) -> void {
         if (appLogger) [[likely]]
                 QUILL_LOG(appLogger, quill::LogLevel::Critical, fmt, std::forward<decltype(args)>(args)...);
     }
 
-    void backtrace(const char *fmt, auto &&... args) {
+    auto backtrace(const char *fmt, auto &&... args) -> void {
         if (appLogger) [[likely]]
                 QUILL_LOG(appLogger, quill::LogLevel::Backtrace, fmt, std::forward<decltype(args)>(args)...);
     }
 
-    void trace_l3_core(const char *fmt, auto &&... args) {
+    auto trace_l3_core(const char *fmt, auto &&... args) -> void {
         if (coreLogger) [[likely]]
                 QUILL_LOG(coreLogger, quill::LogLevel::TraceL3, fmt, std::forward<decltype(args)>(args)...);
     }
 
-    void trace_l2_core(const char *fmt, auto &&... args) {
+    auto trace_l2_core(const char *fmt, auto &&... args) -> void {
         if (coreLogger) [[likely]]
                 QUILL_LOG(coreLogger, quill::LogLevel::TraceL2, fmt, std::forward<decltype(args)>(args)...);
     }
 
-    void trace_l1_core(const char *fmt, auto &&... args) {
+    auto trace_l1_core(const char *fmt, auto &&... args) -> void {
         if (coreLogger) [[likely]]
                 QUILL_LOG(coreLogger, quill::LogLevel::TraceL1, fmt, std::forward<decltype(args)>(args)...);
     }
 
-    void debug_core(const char *fmt, auto &&... args) {
+    auto debug_core(const char *fmt, auto &&... args) -> void {
         if (coreLogger) [[likely]]
                 QUILL_LOG(coreLogger, quill::LogLevel::Debug, fmt, std::forward<decltype(args)>(args)...);
     }
 
-    void info_core(const char *fmt, auto &&... args) {
+    auto info_core(const char *fmt, auto &&... args) -> void {
         if (coreLogger) [[likely]]
                 QUILL_LOG(coreLogger, quill::LogLevel::Info, fmt, std::forward<decltype(args)>(args)...);
     }
 
-    void notice_core(const char *fmt, auto &&... args) {
+    auto notice_core(const char *fmt, auto &&... args) -> void {
         if (coreLogger) [[likely]]
                 QUILL_LOG(coreLogger, quill::LogLevel::Notice, fmt, std::forward<decltype(args)>(args)...);
     }
 
-    void warn_core(const char *fmt, auto &&... args) {
+    auto warn_core(const char *fmt, auto &&... args) -> void {
         if (coreLogger) [[likely]]
                 QUILL_LOG(coreLogger, quill::LogLevel::Warning, fmt, std::forward<decltype(args)>(args)...);
     }
 
-    void error_core(const char *fmt, auto &&... args) {
+    auto error_core(const char *fmt, auto &&... args) -> void {
         if (coreLogger) [[likely]]
                 QUILL_LOG(coreLogger, quill::LogLevel::Error, fmt, std::forward<decltype(args)>(args)...);
     }
 
-    void critical_core(const char *fmt, auto &&... args) {
+    auto critical_core(const char *fmt, auto &&... args) -> void {
         if (coreLogger) [[likely]]
                 QUILL_LOG(coreLogger, quill::LogLevel::Critical, fmt, std::forward<decltype(args)>(args)...);
     }
 
-    void backtrace_core(const char *fmt, auto &&... args) {
+    auto backtrace_core(const char *fmt, auto &&... args) -> void {
         if (coreLogger) [[likely]]
                 QUILL_LOG(coreLogger, quill::LogLevel::Backtrace, fmt, std::forward<decltype(args)>(args)...);
     }
 
     // -------------------- Value logging --------------------
-    void vdebug(const char *msg, auto &&... vars) {
+    auto vdebug(const char *msg, auto &&... vars) -> void {
         if (appLogger) [[likely]]
                 QUILL_LOGV(appLogger, quill::LogLevel::Debug, msg, std::forward<decltype(vars)>(vars)...);
     }
 
-    void vinfo(const char *msg, auto &&... vars) {
+    auto vinfo(const char *msg, auto &&... vars) -> void {
         if (appLogger) [[likely]]
                 QUILL_LOGV(appLogger, quill::LogLevel::Info, msg, std::forward<decltype(vars)>(vars)...);
     }
 
-    void vwarn(const char *msg, auto &&... vars) {
+    auto vwarn(const char *msg, auto &&... vars) -> void {
         if (appLogger) [[likely]]
                 QUILL_LOGV(appLogger, quill::LogLevel::Warning, msg, std::forward<decltype(vars)>(vars)...);
     }
 
-    void verror(const char *msg, auto &&... vars) {
+    auto verror(const char *msg, auto &&... vars) -> void {
         if (appLogger) [[likely]]
                 QUILL_LOGV(appLogger, quill::LogLevel::Error, msg, std::forward<decltype(vars)>(vars)...);
     }
 
-    void vdebug_core(const char *msg, auto &&... args) {
+    auto vdebug_core(const char *msg, auto &&... args) -> void {
         if (coreLogger) [[likely]]
                 QUILL_LOGV(coreLogger, quill::LogLevel::Debug, msg, std::forward<decltype(args)>(args)...);
     }
 
-    void vinfo_core(const char *msg, auto &&... vars) {
+    auto vinfo_core(const char *msg, auto &&... vars) -> void {
         if (coreLogger) [[likely]]
                 QUILL_LOGV(coreLogger, quill::LogLevel::Info, msg, std::forward<decltype(vars)>(vars)...);
     }
 
-    void vwarn_core(const char *msg, auto &&... vars) {
+    auto vwarn_core(const char *msg, auto &&... vars) -> void {
         if (coreLogger) [[likely]]
                 QUILL_LOGV(coreLogger, quill::LogLevel::Warning, msg, std::forward<decltype(vars)>(vars)...);
     }
 
-    void verror_core(const char *msg, auto &&... vars) {
+    auto verror_core(const char *msg, auto &&... vars) -> void {
         if (coreLogger) [[likely]]
                 QUILL_LOGV(coreLogger, quill::LogLevel::Error, msg, std::forward<decltype(vars)>(vars)...);
     }

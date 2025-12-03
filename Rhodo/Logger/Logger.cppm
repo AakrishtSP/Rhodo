@@ -20,41 +20,41 @@ export namespace Rhodo::Logger
 
     // Runtime log level switching
     auto set_core_level(log_level level) -> void;
-    auto set_app_level(log_level level)  -> void;
+    auto set_app_level (log_level level)  -> void;
 
     // Normal logging (fmt-style)
-    void trace_l3(const char* fmt, auto&&... args);
-    void trace_l2(const char* fmt, auto&&... args);
-    void trace_l1(const char* fmt, auto&&... args);
-    void debug   (const char* fmt, auto&&... args);
-    void info    (const char* fmt, auto&&... args);
-    void notice  (const char* fmt, auto&&... args);
-    void warn    (const char* fmt, auto&&... args);
-    void error   (const char* fmt, auto&&... args);
-    void critical(const char* fmt, auto&&... args);
-    void backtrace(const char* fmt, auto&&... args);
+    auto trace_l3(const char *fmt, auto &&... args) -> void;
+    auto trace_l2(const char *fmt, auto &&... args) -> void;
+    auto trace_l1(const char *fmt, auto &&... args) -> void;
+    auto debug(const char *fmt, auto &&... args) -> void;
+    auto info(const char *fmt, auto &&... args) -> void;
+    auto notice(const char *fmt, auto &&... args) -> void;
+    auto warn(const char *fmt, auto &&... args) -> void;
+    auto error(const char *fmt, auto &&... args) -> void;
+    auto critical(const char *fmt, auto &&... args) -> void;
+    auto backtrace(const char *fmt, auto &&... args) -> void;
 
     // Core logger versions
-    void trace_l3_core(const char* fmt, auto&&... args);
-    void trace_l2_core(const char* fmt, auto&&... args);
-    void trace_l1_core(const char* fmt, auto&&... args);
-    void debug_core   (const char* fmt, auto&&... args);
-    void info_core    (const char* fmt, auto&&... args);
-    void notice_core  (const char* fmt, auto&&... args);
-    void warn_core    (const char* fmt, auto&&... args);
-    void error_core   (const char* fmt, auto&&... args);
-    void critical_core(const char* fmt, auto&&... args);
-    void backtrace_core(const char* fmt, auto&&... args);
+    auto trace_l3_core(const char *fmt, auto &&... args) -> void;
+    auto trace_l2_core(const char *fmt, auto &&... args) -> void;
+    auto trace_l1_core(const char *fmt, auto &&... args) -> void;
+    auto debug_core(const char *fmt, auto &&... args) -> void;
+    auto info_core(const char *fmt, auto &&... args) -> void;
+    auto notice_core(const char *fmt, auto &&... args) -> void;
+    auto warn_core(const char *fmt, auto &&... args) -> void;
+    auto error_core(const char *fmt, auto &&... args) -> void;
+    auto critical_core(const char *fmt, auto &&... args) -> void;
+    auto backtrace_core(const char *fmt, auto &&... args) -> void;
 
     // Value logging (LOGV equivalent)
-    void vdebug(const char* msg, auto&&... vars);
-    void vinfo (const char* msg, auto&&... vars);
-    void vwarn (const char* msg, auto&&... vars);
-    void verror(const char* msg, auto&&... vars);
+    auto vdebug(const char *msg, auto &&... vars) -> void;
+    auto vinfo(const char *msg, auto &&... vars) -> void;
+    auto vwarn(const char *msg, auto &&... vars) -> void;
+    auto verror(const char *msg, auto &&... vars) -> void;
 
-    void vdebug_core(const char* msg, auto&&... vars);
-    void vinfo_core (const char* msg, auto&&... vars);
-    void vwarn_core (const char* msg, auto&&... vars);
-    void verror_core(const char* msg, auto&&... vars);
+    auto vdebug_core(const char *msg, auto &&... vars) -> void;
+    auto vinfo_core(const char *msg, auto &&... vars) -> void;
+    auto vwarn_core(const char *msg, auto &&... vars) -> void;
+    auto verror_core(const char *msg, auto &&... vars) -> void;
 }
 

@@ -190,9 +190,9 @@ TEST_CASE("Signal connect/disconnect while emitting", "[Signal][thread]") {
 // -----------------------------------------------------------------------------
 TEST_CASE("Signal batched cleanup respects threshold", "[Signal]") {
     Signal<> sig;
-    constexpr uint32_t THRESH = Signal<>::CLEANUP_THRESHOLD;
+    constexpr uint32_t THRESH = Signal<>::cleanup_threshold;
 
-    std::vector<Signal<>::SlotID> ids;
+    std::vector<Signal<>::slot_id> ids;
     for (uint32_t i = 0; i < THRESH * 2; ++i) {
         ids.push_back(sig.connect([]{}));
     }
@@ -269,22 +269,6 @@ TEST_CASE("Global Signals helpers", "[Signals]") {
     Signals::remove<std::string>("log");
     REQUIRE(!Signals::has<std::string>("log"));
 }
-
-// // -----------------------------------------------------------------------------
-// // ID overflow protection   It will not overflow in practice due to 64-bit IDs
-// // -----------------------------------------------------------------------------
-// TEST_CASE("Signal ID overflow wraps safely", "[Signal]") {
-//     Signal<> sig;
-//     // Force next_id_ to UINT64_MAX
-//     auto& next = sig._test_next_id_();
-//     next.store(UINT64_MAX, std::memory_order_relaxed);
-//
-//     auto id1 = sig.connect([]{});
-//     auto id2 = sig.connect([]{});
-//
-//     REQUIRE(id1 == 1);
-//     REQUIRE(id2 == 2);
-// }
 
 // -----------------------------------------------------------------------------
 // Exception safety – callbacks may throw

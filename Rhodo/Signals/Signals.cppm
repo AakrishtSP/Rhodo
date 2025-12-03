@@ -1,65 +1,56 @@
 module;
-#include <string>
 #include <functional>
+#include <string>
 
 export module Rhodo.Signals;
 
-export import Rhodo.Signals.Signal;
-export import Rhodo.Signals.SignalHub;
-export import Rhodo.Signals.ScopedConnection;
-
+export import :Signal;
+export import :SignalHub;
+export import :ScopedConnection;
 
 export namespace Rhodo::Signals
 {
-    inline SignalHub& global() noexcept
-    {
+    constexpr auto global() noexcept -> SignalHub & {
         static SignalHub hub;
         return hub;
     }
 
     template <typename... Args>
-    Signal<Args...>& get(const std::string& name)
-    {
+    auto get(const std::string &name) -> Signal<Args...> & {
         return global().get<Args...>(name);
     }
 
     template <typename... Args>
-    [[nodiscard]] bool has(const std::string& name) noexcept
-    {
+    [[nodiscard]] auto has(const std::string &name) noexcept -> bool {
         return global().has<Args...>(name);
     }
 
     template <typename... Args>
-    void remove(const std::string& name)
-    {
+    auto remove(const std::string &name) -> void {
         global().remove<Args...>(name);
     }
 
-    inline void clear() noexcept
-    {
+    inline auto clear() noexcept -> void {
         global().clear();
     }
 
-    inline void cleanup_empty()
-    {
+    inline auto cleanup_empty() -> void {
         global().cleanup_empty_signals();
     }
 
     template <typename... Args>
-    [[nodiscard]] ScopedConnection<Args...> make_scoped_connection(
-        Signal<Args...>& signal,
-        std::function<void(Args...)> callback)
-    {
+    [[nodiscard]] auto make_scoped_connection(
+            Signal<Args...> &signal,
+            std::function<void(Args...)> callback) -> ScopedConnection<Args...> {
         auto id = signal.connect(std::move(callback));
         return ScopedConnection<Args...>(signal, id);
     }
 
     template <typename... Args, typename T>
-    [[nodiscard]] ScopedConnection<Args...> make_scoped_connection(
-        Signal<Args...>& signal,
-        T& obj,
-        void (T::*method)(Args...))
-    {
+    [[nodiscard]] auto make_scoped_connection(
+            Signal<Args...> &signal,
+            T &obj,
+            void (T::*method)(Args...)) -> ScopedConnection<Args...> {
         auto id = signal.connect(obj, method);
         return ScopedConnection<Args...>(signal, id);
     }
