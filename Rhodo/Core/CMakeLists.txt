@@ -8,5 +8,10 @@ target_sources(RhodoCore
         EntryPoint.cpp
 )
 
+target_link_libraries(RhodoCore
+        PRIVATE
+        RhodoLogger
+)
+
 target_include_directories(RhodoCore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
