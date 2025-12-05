@@ -54,15 +54,16 @@ namespace Rhodo::Logger::Impl {
     class LoggerImpl {
     public:
         LoggerImpl() = delete;
+
         ~LoggerImpl() = default;
 
         explicit LoggerImpl(const LoggerConfig &config);
 
-        auto log(logLevel level, const char *fmt, auto &&... args) -> void ;
+        auto log(logLevel level, const char *fmt, auto &&... args) -> void;
 
-        auto setLevel(logLevel level) const -> void ;
+        auto setLevel(logLevel level) const -> void;
 
-        auto flush() const -> void ;
+        auto flush() const -> void;
 
     private:
         quill::Logger *logger_ = nullptr;
@@ -97,7 +98,7 @@ namespace Rhodo::Logger::Impl {
         logger_->set_log_level(toQuillLevel(config.defaultLevel));
     }
 
-    auto LoggerImpl::log(const logLevel level, const char *fmt, auto &&...args) -> void {
+    auto LoggerImpl::log(const logLevel level, const char *fmt, auto &&... args) -> void {
         if (logger_) [[likely]] {
             QUILL_LOG_DYNAMIC(logger_, toQuillLevel(level), fmt,
                               std::forward<decltype(args)>(args)...

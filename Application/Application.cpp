@@ -13,9 +13,9 @@ int main() {
     int a = 5;
     std::array v{1,2,3};
     std::vector vv{1,2,3};
-    appLogger.info("int a {}",a);
-    appLogger.info("array v {}",v);
-    appLogger.info("vec vv {}",vv);
+    appLogger.info("int a {}", a);
+    appLogger.info("array v {}", v);
+    appLogger.info("vec vv {}", vv);
 
     // Rhodo::Logger::flush();
     return 0;
