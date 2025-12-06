@@ -1,20 +1,30 @@
 ---
 Language: Cpp
 BasedOnStyle: LLVM
+
+# --- Indentation & Width ---
+IndentWidth: 4
+TabWidth: 4
+ContinuationIndentWidth: 8
 AccessModifierOffset: -4
-AlignConsecutiveAssignments: false
-AlignConsecutiveDeclarations: false
-AlignOperands: true
-AlignTrailingComments: false
-AllowShortCaseLabelsOnASingleLine: true
-AllowShortIfStatementsOnASingleLine: false
+NamespaceIndentation: All
+IndentCaseLabels: true
+ColumnLimit: 120
+
+# --- Line Breaking ---
 AlwaysBreakTemplateDeclarations: Yes
-BraceWrapping: 
+BreakBeforeBraces: Custom
+BreakConstructorInitializers: AfterColon
+BreakConstructorInitializersBeforeComma: false
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+
+# --- Brace Wrapping ---
+BraceWrapping:
   AfterCaseLabel: false
-  AfterClass: false
+  AfterClass: true
   AfterControlStatement: false
   AfterEnum: false
-  AfterFunction: false
+  AfterFunction: true
   AfterNamespace: false
   AfterStruct: false
   AfterUnion: false
@@ -26,34 +36,65 @@ BraceWrapping:
   SplitEmptyFunction: true
   SplitEmptyRecord: true
   SplitEmptyNamespace: true
-BreakBeforeBraces: Custom
-BreakConstructorInitializers: AfterColon
-BreakConstructorInitializersBeforeComma: false
-ColumnLimit: 120
-ConstructorInitializerAllOnOneLineOrOnePerLine: false
-ContinuationIndentWidth: 8
-IncludeCategories: 
-  - Regex: '^<.*'
-    Priority: 1
-  - Regex: '^".*'
-    Priority: 2
-  - Regex: '.*'
-    Priority: 3
-IncludeIsMainRegex: '([-_](test|unittest))?$'
-IndentCaseLabels: true
-IndentWidth: 4
-InsertNewlineAtEOF: true
-MacroBlockBegin: ''
-MacroBlockEnd: ''
-MaxEmptyLinesToKeep: 2
-NamespaceIndentation: All
+
+# --- Alignment ---
+AlignOperands: true
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AlignTrailingComments: false
+AlignConsecutiveMacros: Consecutive
+AlignEscapedNewlines: Right
+AlignAfterOpenBracket: Align
+
+# --- Short Constructs ---
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: false
+
+# --- Spaces ---
+SpacesInAngles: false
+SpacesInParentheses: false
+SpacesInConditionalStatement: false
+SpacesInCStyleCastParentheses: false
 SpaceAfterCStyleCast: true
 SpaceAfterTemplateKeyword: false
 SpaceBeforeRangeBasedForLoopColon: false
 SpaceInEmptyParentheses: false
-SpacesInAngles: false
-SpacesInConditionalStatement: false
-SpacesInCStyleCastParentheses: false
-SpacesInParentheses: false
-TabWidth: 4
+
+# --- Includes ---
+IncludeIsMainRegex: '([-_](test|unittest))?$'
+IncludeCategories:
+  - Regex: '^<.*\.h>'      # C system headers
+    Priority: 1
+  - Regex: '^<.*>'         # C++ standard library
+    Priority: 2
+  - Regex: '^<.*\.hpp>'    # Third-party libraries
+    Priority: 3
+  - Regex: '^".*"'         # Project headers
+    Priority: 4
+SortIncludes: CaseSensitive
+IncludeBlocks: Regroup
+
+# --- Macros ---
+MacroBlockBegin: ''
+MacroBlockEnd: ''
+
+# --- Newlines ---
+InsertNewlineAtEOF: true
+MaxEmptyLinesToKeep: 2
+
+# C++11/14/17/20 specific
+Cpp11BracedListStyle: true
+FixNamespaceComments: true
+SortUsingDeclarations: true
+
+# Pointer alignment
+PointerAlignment: Right
+DerivePointerAlignment: false
+
+# Short constructs
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortLambdasOnASingleLine: All
+AllowShortBlocksOnASingleLine: Empty
+AllowShortEnumsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
 ...

@@ -44,7 +44,7 @@ TEST_CASE("ScopedConnection auto-disconnects", "[ScopedConnection]") {
     int count = 0;
 
     {
-        [[maybe_unused]] auto conn = Signals::make_scoped_connection(sig, std::function<void()>{ [&count] { ++count; } });
+        [[maybe_unused]] auto conn = Signals::makeScopedConnection(sig, std::function<void()>{ [&count] { ++count; } });
         sig.emit();
         REQUIRE(count == 1);
     }                                   // conn destroyed here
@@ -116,7 +116,7 @@ TEST_CASE("Signal disconnect_all", "[Signal]") {
     sig.emit(1);
     REQUIRE(logs == std::vector<int>{1, 2});
 
-    sig.disconnect_all();
+    sig.disconnectAll();
     sig.emit(10);
     REQUIRE(logs == std::vector<int>{1, 2});   // no new entries
 }
@@ -129,12 +129,12 @@ TEST_CASE("Signal blocking_emit guarantees delivery", "[Signal]") {
     std::atomic<int> counter{0};
 
     sig.connect([&]{ ++counter; });
-    sig.blocking_emit();
+    sig.blockingEmit();
     REQUIRE(counter == 1);
 
     // Even after disconnect_all, blocking_emit still sees current slots
-    sig.disconnect_all();
-    sig.blocking_emit();               // no effect
+    sig.disconnectAll();
+    sig.blockingEmit();               // no effect
     REQUIRE(counter == 1);
 }
 
@@ -192,7 +192,7 @@ TEST_CASE("Signal batched cleanup respects threshold", "[Signal]") {
     Signal<> sig;
     constexpr uint32_t THRESH = Signal<>::cleanup_threshold;
 
-    std::vector<slot_id> ids;
+    std::vector<slotId> ids;
     for (uint32_t i = 0; i < THRESH * 2; ++i) {
         ids.push_back(sig.connect([]{}));
     }
@@ -216,10 +216,10 @@ TEST_CASE("Signal force_cleanup removes dead slots immediately", "[Signal]") {
     Signal<> sig;
     auto id = sig.connect([]{});
     sig.disconnect(id);
-    REQUIRE(sig.container_size() == 1);          // still in container
+    REQUIRE(sig.containerSize() == 1);          // still in container
 
-    sig.force_cleanup();
-    REQUIRE(sig.container_size() == 0);
+    sig.forceCleanup();
+    REQUIRE(sig.containerSize() == 0);
 }
 
 // -----------------------------------------------------------------------------
@@ -251,7 +251,7 @@ TEST_CASE("SignalHub cleanup_empty_signals", "[SignalHub]") {
     Signals::get<int>("empty2");
     REQUIRE(Signals::global().size() == 2);
 
-    Signals::cleanup_empty();          // removes empty signals
+    Signals::cleanupEmpty();          // removes empty signals
     REQUIRE(Signals::global().size() == 0);
 }
 
@@ -279,5 +279,5 @@ TEST_CASE("Signal exception safety", "[Signal]") {
     sig.connect([](int v){ /* ignore */ });
 
     REQUIRE_NOTHROW(sig.emit(0));      // one throws, other still called
-    REQUIRE_NOTHROW(sig.blocking_emit(0));
+    REQUIRE_NOTHROW(sig.blockingEmit(0));
 }

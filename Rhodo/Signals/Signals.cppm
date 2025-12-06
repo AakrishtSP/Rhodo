@@ -21,25 +21,25 @@ export namespace Rhodo::Signals
     }
 
     template <typename... Args>
-    [[nodiscard]] auto has(const std::string &name) noexcept -> bool {
+    [[nodiscard]] bool has(const std::string &name) noexcept {
         return global().has<Args...>(name);
     }
 
     template <typename... Args>
-    auto remove(const std::string &name) -> void {
+    void remove(const std::string &name) {
         global().remove<Args...>(name);
     }
 
-    inline auto clear() noexcept -> void {
+    inline void clear() noexcept {
         global().clear();
     }
 
-    inline auto cleanup_empty() -> void {
-        global().cleanup_empty_signals();
+    inline void cleanupEmpty() {
+        global().cleanupEmptySignals();
     }
 
     template <typename... Args>
-    [[nodiscard]] auto make_scoped_connection(
+    [[nodiscard]] auto makeScopedConnection(
             Signal<Args...> &signal,
             std::function<void(Args...)> callback) -> ScopedConnection<Args...> {
         auto id = signal.connect(std::move(callback));
@@ -47,7 +47,7 @@ export namespace Rhodo::Signals
     }
 
     template <typename... Args, typename T>
-    [[nodiscard]] auto make_scoped_connection(
+    [[nodiscard]] auto makeScopedConnection(
             Signal<Args...> &signal,
             T &obj,
             void (T::*method)(Args...)) -> ScopedConnection<Args...> {

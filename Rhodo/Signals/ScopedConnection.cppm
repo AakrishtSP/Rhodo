@@ -10,7 +10,7 @@ export namespace Rhodo
 
     public:
         ScopedConnection() noexcept;
-        ScopedConnection(Signal<Args...>& signal, slot_id id) noexcept;
+        ScopedConnection(Signal<Args...>& signal, slotId id) noexcept;
         ~ScopedConnection() noexcept;
 
         // Move-only semantics
@@ -20,19 +20,19 @@ export namespace Rhodo
         ScopedConnection& operator=(const ScopedConnection&) = delete;
 
 
-        auto disconnect() noexcept -> void ;
-        [[nodiscard]] auto connected() const noexcept -> bool ;
+        void disconnect() noexcept;
+        [[nodiscard]] bool connected() const noexcept;
         [[nodiscard]] explicit operator bool() const noexcept;
     private:
         Signal<Args...>* signal_ = nullptr;
-        slot_id id_ = 0;
+        slotId id_ = 0;
     };
 
     template<typename ... Args>
     ScopedConnection<Args...>::ScopedConnection() noexcept = default;
 
     template<typename ... Args>
-    ScopedConnection<Args...>::ScopedConnection(Signal<Args...> &signal, const slot_id id) noexcept: signal_(&signal), id_(id) {
+    ScopedConnection<Args...>::ScopedConnection(Signal<Args...> &signal, const slotId id) noexcept: signal_(&signal), id_(id) {
     }
 
     template<typename ... Args>
@@ -60,7 +60,7 @@ export namespace Rhodo
     }
 
     template<typename ... Args>
-    auto ScopedConnection<Args...>::disconnect() noexcept -> void {
+    void ScopedConnection<Args...>::disconnect() noexcept {
         if (signal_)
         {
             signal_->disconnect(id_);
@@ -70,7 +70,7 @@ export namespace Rhodo
     }
 
     template<typename ... Args>
-    auto ScopedConnection<Args...>::connected() const noexcept -> bool {
+    bool ScopedConnection<Args...>::connected() const noexcept {
         return signal_ != nullptr;
     }
 

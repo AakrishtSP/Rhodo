@@ -21,11 +21,11 @@ export namespace Rhodo
         template <typename... Args>
         void remove(const std::string& name);
 
-        auto clear() noexcept -> void ;
-        auto cleanup_empty_signals() -> void ;
+        void clear() noexcept;
+        void cleanupEmptySignals();
 
         template <typename... Args>
-        [[nodiscard]] auto has(const std::string &name) const noexcept -> bool ;
+        [[nodiscard]] bool has(const std::string &name) const noexcept;
 
         [[nodiscard]] auto size() const noexcept -> size_t ;
     private:
@@ -97,12 +97,12 @@ export namespace Rhodo
         signals_.erase(key);
     }
 
-    auto SignalHub::clear() noexcept -> void {
+    void SignalHub::clear() noexcept {
         std::unique_lock lock(mutex_);
         signals_.clear();
     }
 
-    auto SignalHub::cleanup_empty_signals() -> void {
+    void SignalHub::cleanupEmptySignals() {
         std::unique_lock lock(mutex_);
         for (auto it = signals_.begin(); it != signals_.end();)
         {
@@ -118,7 +118,7 @@ export namespace Rhodo
     }
 
     template<typename ... Args>
-    auto SignalHub::has(const std::string &name) const noexcept -> bool {
+    bool SignalHub::has(const std::string &name) const noexcept {
         std::shared_lock lock(mutex_);
         const SignalKey key{name, std::type_index(typeid(Signal<Args...>))};
         return signals_.contains(key);
@@ -129,7 +129,7 @@ export namespace Rhodo
         return signals_.size();
     }
 
-    auto SignalHub::SignalKey::operator==(const SignalKey &other) const noexcept -> bool {
+    bool SignalHub::SignalKey::operator==(const SignalKey &other) const noexcept {
         return name == other.name && type == other.type;
     }
 
@@ -143,7 +143,7 @@ export namespace Rhodo
     SignalHub::ISignalHolder::~ISignalHolder() = default;
 
     template<typename ... Args>
-    auto SignalHub::SignalHolder<Args...>::is_empty() const noexcept -> bool {
+    bool SignalHub::SignalHolder<Args...>::is_empty() const noexcept {
         return signal.empty();
     }
 }
