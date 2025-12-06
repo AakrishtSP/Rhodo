@@ -27,7 +27,8 @@ import :Structures;
 namespace Rhodo::Logger::Impl {
     inline static bool backendInitialized = false;
 
-    inline void ensureBackendStarted() {
+    inline void ensureBackendStarted()
+    {
         if (!backendInitialized) [[unlikely]] {
             backendInitialized = true;
             quill::Backend::start();
@@ -59,7 +60,7 @@ namespace Rhodo::Logger::Impl {
 
         explicit LoggerImpl(const LoggerConfig &config);
 
-        void log(logLevel level, const char *fmt, auto &&... args);
+        void log(logLevel level, const char *fmt, auto &&...args);
 
         void setLevel(logLevel level) const;
 
@@ -98,7 +99,8 @@ namespace Rhodo::Logger::Impl {
         logger_->set_log_level(toQuillLevel(config.defaultLevel));
     }
 
-    void LoggerImpl::log(const logLevel level, const char *fmt, auto &&... args) {
+    void LoggerImpl::log(const logLevel level, const char *fmt, auto &&...args)
+    {
         if (logger_) [[likely]] {
             QUILL_LOG_DYNAMIC(logger_, toQuillLevel(level), fmt,
                               std::forward<decltype(args)>(args)...
@@ -106,13 +108,15 @@ namespace Rhodo::Logger::Impl {
         }
     }
 
-    void LoggerImpl::setLevel(const logLevel level) const {
+    void LoggerImpl::setLevel(const logLevel level) const
+    {
         if (logger_) {
             logger_->set_log_level(toQuillLevel(level));
         }
     }
 
-    void LoggerImpl::flush() const {
+    void LoggerImpl::flush() const
+    {
         if (logger_) [[likely]]{
             logger_->flush_log();
         }

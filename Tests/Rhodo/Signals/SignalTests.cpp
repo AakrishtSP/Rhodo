@@ -44,7 +44,7 @@ TEST_CASE("ScopedConnection auto-disconnects", "[ScopedConnection]") {
     int count = 0;
 
     {
-        [[maybe_unused]] auto conn = Signals::makeScopedConnection(sig, std::function<void()>{ [&count] { ++count; } });
+        [[maybe_unused]] auto conn = Signals::makeScopedConnection(sig, std::function<void()>{[&count] { ++count; }});
         sig.emit();
         REQUIRE(count == 1);
     }                                   // conn destroyed here
@@ -134,7 +134,7 @@ TEST_CASE("Signal blocking_emit guarantees delivery", "[Signal]") {
 
     // Even after disconnect_all, blocking_emit still sees current slots
     sig.disconnectAll();
-    sig.blockingEmit();               // no effect
+    sig.blockingEmit(); // no effect
     REQUIRE(counter == 1);
 }
 
@@ -216,7 +216,7 @@ TEST_CASE("Signal force_cleanup removes dead slots immediately", "[Signal]") {
     Signal<> sig;
     auto id = sig.connect([]{});
     sig.disconnect(id);
-    REQUIRE(sig.containerSize() == 1);          // still in container
+    REQUIRE(sig.containerSize() == 1); // still in container
 
     sig.forceCleanup();
     REQUIRE(sig.containerSize() == 0);
@@ -251,7 +251,7 @@ TEST_CASE("SignalHub cleanup_empty_signals", "[SignalHub]") {
     Signals::get<int>("empty2");
     REQUIRE(Signals::global().size() == 2);
 
-    Signals::cleanupEmpty();          // removes empty signals
+    Signals::cleanupEmpty(); // removes empty signals
     REQUIRE(Signals::global().size() == 0);
 }
 

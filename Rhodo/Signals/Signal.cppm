@@ -20,12 +20,12 @@ export namespace Rhodo
     public:
 
         static constexpr uint32_t cleanup_threshold = 16;
-        auto nextId() const -> uint64_t ;
+        auto nextId() const -> uint64_t;
 
         // Connect - WRITE operation
         template <typename T>
-        auto connect(T &obj, void (T::*method)(Args...)) -> slotId ;
-        auto connect(std::function<void(Args...)> callback) -> slotId ;
+        auto connect(T &obj, void (T::*method)(Args...)) -> slotId;
+        auto connect(std::function<void(Args...)> callback) -> slotId;
 
         // Disconnect - WRITE
         void disconnect(slotId id);
@@ -33,17 +33,17 @@ export namespace Rhodo
 
         // Emit signal - READ operation
         template <typename... A>
-        void emit(A &&... args);
+        void emit(A &&...args);
         template <typename... A>
-        void blockingEmit(A &&... args);
+        void blockingEmit(A &&...args);
 
         // Operator() as alias for emit
         template <typename... A>
-        void operator()(A &&... args);
+        void operator()(A &&...args);
 
         // Query
         [[nodiscard]] auto size() const noexcept -> size_t ; // ACTIVE slots
-        [[nodiscard]] auto containerSize() const noexcept -> size_t ; // slots incl inactive waiting for cleanup
+        [[nodiscard]] auto containerSize() const noexcept -> size_t; // slots incl inactive waiting for cleanup
         [[nodiscard]] bool empty() const noexcept;
 
         // Clear all slots - WRITE operation
@@ -69,18 +69,22 @@ export namespace Rhodo
     };
 
     template<typename ... Args>
-    auto Signal<Args...>::nextId() const -> uint64_t { return next_id_.load(); }
+    auto Signal<Args...>::nextId() const -> uint64_t
+    {
+        return next_id_.load();
+    }
 
     template<typename ... Args>
     template<typename T>
-    auto Signal<Args...>::connect(T &obj, void(T::*method)(Args...)) -> slotId {
+    auto Signal<Args...>::connect(T &obj, void (T::*method)(Args...)) -> slotId
+    {
         return connect([&obj, method](Args&&... args)
         {
             (obj.*method)(std::forward<Args>(args)...);
         });
     }
 
-    template<typename ... Args>
+    template<typename... Args>
     auto Signal<Args...>::connect(std::function<void(Args...)> callback) -> slotId {
         std::unique_lock lock(mutex_);
 
@@ -97,7 +101,7 @@ export namespace Rhodo
         return id;
     }
 
-    template<typename ... Args>
+    template<typename... Args>
     void Signal<Args...>::disconnect(slotId id) {
         std::unique_lock lock(mutex_);
 
@@ -121,7 +125,7 @@ export namespace Rhodo
 
     }
 
-    template<typename ... Args>
+    template<typename... Args>
     void Signal<Args...>::disconnectAll() noexcept {
         std::unique_lock lock(mutex_);
         for (auto& slot : slots_)
@@ -133,8 +137,8 @@ export namespace Rhodo
     }
 
     template<typename ... Args>
-    template<typename ... A>
-    void Signal<Args...>::emit(A &&... args) {
+    template<typename... A>
+    void Signal<Args...>::emit(A &&...args) {
         {
             std::shared_lock lock(mutex_);
 
@@ -161,8 +165,7 @@ export namespace Rhodo
         {
             std::unique_lock lock(mutex_);
             // Double-check after acquiring a lock
-            if (needs_cleanup_.exchange(false, std::memory_order_acq_rel))
-            {
+            if (needs_cleanup_.exchange(false, std::memory_order_acq_rel)) {
                 cleanupInternal();
             }
         }
@@ -170,7 +173,8 @@ export namespace Rhodo
 
     template<typename ... Args>
     template<typename ... A>
-    void Signal<Args...>::blockingEmit(A &&... args) {
+    void Signal<Args...>::blockingEmit(A &&...args)
+    {
         std::unique_lock lock(mutex_);
 
         for (const auto& slot : slots_)
@@ -196,7 +200,8 @@ export namespace Rhodo
 
     template<typename ... Args>
     template<typename ... A>
-    void Signal<Args...>::operator()(A &&... args) {
+    void Signal<Args...>::operator()(A &&...args)
+    {
         emit(std::forward<A>(args)...);
     }
 
@@ -212,18 +217,20 @@ export namespace Rhodo
     }
 
     template<typename ... Args>
-    auto Signal<Args...>::containerSize() const noexcept -> size_t {
+    auto Signal<Args...>::containerSize() const noexcept -> size_t
+    {
         std::shared_lock lock(mutex_);
         const size_t sz = slots_.size();
         return sz;
     }
 
     template<typename ... Args>
-    bool Signal<Args...>::empty() const noexcept {
+    bool Signal<Args...>::empty() const noexcept
+    {
         return size() == 0;
     }
 
-    template<typename ... Args>
+    template<typename... Args>
     void Signal<Args...>::clear() noexcept {
         std::unique_lock lock(mutex_);
         slots_.clear();
@@ -231,13 +238,14 @@ export namespace Rhodo
         disconnect_count_.store(0, std::memory_order_relaxed);
     }
 
-    template<typename ... Args>
-    void Signal<Args...>::forceCleanup() {
+    template<typename... Args>
+    void Signal<Args...>::forceCleanup()
+    {
         std::unique_lock lock(mutex_);
         cleanupInternal();
     }
 
-    template<typename ... Args>
+    template<typename... Args>
     void Signal<Args...>::cleanupInternal() noexcept {
         slots_.erase(
             std::remove_if(slots_.begin(), slots_.end(),

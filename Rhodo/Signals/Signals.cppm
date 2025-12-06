@@ -21,20 +21,24 @@ export namespace Rhodo::Signals
     }
 
     template <typename... Args>
-    [[nodiscard]] bool has(const std::string &name) noexcept {
+    [[nodiscard]] bool has(const std::string &name) noexcept
+    {
         return global().has<Args...>(name);
     }
 
     template <typename... Args>
-    void remove(const std::string &name) {
+    void remove(const std::string &name)
+    {
         global().remove<Args...>(name);
     }
 
-    inline void clear() noexcept {
+    inline void clear() noexcept
+    {
         global().clear();
     }
 
-    inline void cleanupEmpty() {
+    inline void cleanupEmpty()
+    {
         global().cleanupEmptySignals();
     }
 

@@ -28,7 +28,10 @@ export namespace Rhodo::Logger {
         RHODO_LOG_LEVEL(trace_l3)
         RHODO_LOG_LEVEL(trace_l2)
         RHODO_LOG_LEVEL(trace_l1)
-        static void trace(const char* fmt, auto&&... args) { getInstance().log(logLevel::trace_l1, fmt, std::forward<decltype(args)>(args)...); }
+        static void trace(const char *fmt, auto &&...args)
+        {
+            getInstance().log(logLevel::trace_l1, fmt, std::forward<decltype(args)>(args)...);
+        }
         RHODO_LOG_LEVEL(debug)
         RHODO_LOG_LEVEL(info)
         RHODO_LOG_LEVEL(notice)

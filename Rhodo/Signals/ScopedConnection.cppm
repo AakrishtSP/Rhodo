@@ -10,7 +10,7 @@ export namespace Rhodo
 
     public:
         ScopedConnection() noexcept;
-        ScopedConnection(Signal<Args...>& signal, slotId id) noexcept;
+        ScopedConnection(Signal<Args...> &signal, slotId id) noexcept;
         ~ScopedConnection() noexcept;
 
         // Move-only semantics
@@ -32,7 +32,9 @@ export namespace Rhodo
     ScopedConnection<Args...>::ScopedConnection() noexcept = default;
 
     template<typename ... Args>
-    ScopedConnection<Args...>::ScopedConnection(Signal<Args...> &signal, const slotId id) noexcept: signal_(&signal), id_(id) {
+    ScopedConnection<Args...>::ScopedConnection(Signal<Args...> &signal, const slotId id) noexcept :
+        signal_(&signal), id_(id)
+    {
     }
 
     template<typename ... Args>
@@ -59,7 +61,7 @@ export namespace Rhodo
         return *this;
     }
 
-    template<typename ... Args>
+    template<typename... Args>
     void ScopedConnection<Args...>::disconnect() noexcept {
         if (signal_)
         {
@@ -69,7 +71,7 @@ export namespace Rhodo
         }
     }
 
-    template<typename ... Args>
+    template<typename... Args>
     bool ScopedConnection<Args...>::connected() const noexcept {
         return signal_ != nullptr;
     }

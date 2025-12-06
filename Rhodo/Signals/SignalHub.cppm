@@ -97,12 +97,14 @@ export namespace Rhodo
         signals_.erase(key);
     }
 
-    void SignalHub::clear() noexcept {
+    void SignalHub::clear() noexcept
+    {
         std::unique_lock lock(mutex_);
         signals_.clear();
     }
 
-    void SignalHub::cleanupEmptySignals() {
+    void SignalHub::cleanupEmptySignals()
+    {
         std::unique_lock lock(mutex_);
         for (auto it = signals_.begin(); it != signals_.end();)
         {
@@ -118,7 +120,8 @@ export namespace Rhodo
     }
 
     template<typename ... Args>
-    bool SignalHub::has(const std::string &name) const noexcept {
+    bool SignalHub::has(const std::string &name) const noexcept
+    {
         std::shared_lock lock(mutex_);
         const SignalKey key{name, std::type_index(typeid(Signal<Args...>))};
         return signals_.contains(key);
@@ -142,7 +145,7 @@ export namespace Rhodo
 
     SignalHub::ISignalHolder::~ISignalHolder() = default;
 
-    template<typename ... Args>
+    template<typename... Args>
     bool SignalHub::SignalHolder<Args...>::is_empty() const noexcept {
         return signal.empty();
     }
