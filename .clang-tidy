@@ -1,4 +1,3 @@
-# Generated from CLion Inspection settings
 ---
 FormatStyle: file
 HeaderFilterRegex: '^(?!.*(thirdparty|build)).*'
@@ -17,53 +16,54 @@ Checks: >
   portability-*,
   mpi-*,
   openmp-*
-
-WarningsAsErrors: >
-  readability-identifier-naming
-
+WarningsAsErrors: '*'
 CheckOptions:
   # --- General ---
   - { key: misc-no-recursion, value: false }
-  # --- Types ---
-  - { key: readability-identifier-naming.ClassCase,          value: PascalCase }
-  - { key: readability-identifier-naming.StructCase,         value: PascalCase }
-  - { key: readability-identifier-naming.UnionCase,          value: PascalCase }
-  - { key: readability-identifier-naming.EnumCase,           value: PascalCase }
-  - { key: readability-identifier-naming.TypedefCase,        value: PascalCase }
-  - { key: readability-identifier-naming.TypeAliasCase,      value: PascalCase }
 
-  # --- Functions ---
-  - { key: readability-identifier-naming.FunctionCase,       value: camelCase }
-  - { key: readability-identifier-naming.MethodCase,         value: camelCase }
+  # --- Types (CamelCase) ---
+  - { key: readability-identifier-naming.ClassCase,          value: CamelCase }
+  - { key: readability-identifier-naming.StructCase,         value: CamelCase }
+  - { key: readability-identifier-naming.UnionCase,          value: CamelCase }
+  - { key: readability-identifier-naming.EnumCase,           value: CamelCase }
+  - { key: readability-identifier-naming.TypedefCase,        value: CamelCase }
+  - { key: readability-identifier-naming.TypeAliasCase,      value: CamelCase }
+
+  # --- Functions (CamelCase) ---
+  - { key: readability-identifier-naming.FunctionCase,       value: CamelCase }
+  - { key: readability-identifier-naming.MethodCase,         value: CamelCase }
   - { key: readability-function-size.LineThreshold, value: 80 }
   - { key: readability-function-size.StatementThreshold, value: 50 }
   - { key: readability-function-size.BranchThreshold, value: 10 }
   - { key: readability-function-size.ParameterThreshold, value: 8 }
 
-  # --- Variables ---
-  - { key: readability-identifier-naming.VariableCase,       value: camelCase }
-  - { key: readability-identifier-naming.ParameterCase,      value: camelCase }
-  - { key: readability-identifier-naming.PublicMemberCase,   value: camelCase }
-  - { key: readability-identifier-naming.PrivateMemberCase,  value: camelCase }
+  # --- Variables (lower_case) ---
+  - { key: readability-identifier-naming.VariableCase,       value: lower_case }
+  - { key: readability-identifier-naming.ParameterCase,      value: lower_case }
+  - { key: readability-identifier-naming.PublicMemberCase,   value: lower_case }
+  - { key: readability-identifier-naming.PrivateMemberCase,  value: lower_case }
   - { key: readability-identifier-naming.PrivateMemberSuffix,value: _ }
-  - { key: readability-identifier-naming.GlobalVariableCase, value: camelCase }
+  - { key: readability-identifier-naming.GlobalVariableCase, value: lower_case }
   - { key: readability-identifier-naming.GlobalVariablePrefix, value: g_ }
 
-  # --- Constants ---
-  - { key: readability-identifier-naming.ConstantCase,       value: PascalCase }
-  - { key: readability-identifier-naming.GlobalConstantCase, value: PascalCase }
-  - { key: readability-identifier-naming.StaticConstantCase, value: PascalCase }
-  - { key: readability-identifier-naming.ConstexprVariableCase, value: PascalCase }
+  # --- Constants (kCamelCase) ---
+  - { key: readability-identifier-naming.ConstantCase,       value: CamelCase }
+  - { key: readability-identifier-naming.ConstantPrefix,     value: k }
+  - { key: readability-identifier-naming.GlobalConstantCase, value: CamelCase }
+  - { key: readability-identifier-naming.GlobalConstantPrefix, value: k }
+  - { key: readability-identifier-naming.StaticConstantCase, value: CamelCase }
+  - { key: readability-identifier-naming.StaticConstantPrefix, value: k }
+  - { key: readability-identifier-naming.ConstexprVariableCase, value: CamelCase }
+  - { key: readability-identifier-naming.ConstexprVariablePrefix, value: k }
 
-  # --- Enums ---
-  - { key: readability-identifier-naming.EnumConstantCase,   value: PascalCase }
+  # --- Enums (CamelCase) ---
+  - { key: readability-identifier-naming.EnumConstantCase,   value: CamelCase }
 
-  # --- Macros ---
+  # --- Macros (UPPER_CASE) ---
   - { key: readability-identifier-naming.MacroDefinitionCase,value: UPPER_CASE }
 
-  # --- Namespaces ---
+  # --- Namespaces (lower_case per Google style) ---
   - { key: readability-identifier-naming.NamespaceCase,      value: lower_case }
 
-  # --- Templates ---
-  - { key: readability-identifier-naming.TemplateParameterCase, value: PascalCase }
-...
+  # --- Templates (CamelCase) ---
+  - { key: readability-identifier-naming.TemplateParameterCase, value: CamelCase }

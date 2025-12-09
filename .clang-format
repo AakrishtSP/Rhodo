@@ -1,100 +1,89 @@
+#file: noinspection YAMLSchemaValidation
 ---
 Language: Cpp
-BasedOnStyle: LLVM
+BasedOnStyle: Google
 
 # --- Indentation & Width ---
-IndentWidth: 4
-TabWidth: 4
-ContinuationIndentWidth: 8
-AccessModifierOffset: -4
-NamespaceIndentation: All
-IndentCaseLabels: true
-ColumnLimit: 120
+IndentWidth: 2
+TabWidth: 2
+ContinuationIndentWidth: 4
+AccessModifierOffset: -1
+ColumnLimit: 80
 
 # --- Line Breaking ---
 AlwaysBreakTemplateDeclarations: Yes
-BreakBeforeBraces: Custom
-BreakConstructorInitializers: AfterColon
-BreakConstructorInitializersBeforeComma: false
-ConstructorInitializerAllOnOneLineOrOnePerLine: false
-
-# --- Brace Wrapping ---
-BraceWrapping:
-  AfterCaseLabel: false
-  AfterClass: true
-  AfterControlStatement: false
-  AfterEnum: false
-  AfterFunction: true
-  AfterNamespace: false
-  AfterStruct: false
-  AfterUnion: false
-  AfterExternBlock: false
-  BeforeCatch: false
-  BeforeElse: false
-  BeforeLambdaBody: false
-  BeforeWhile: false
-  SplitEmptyFunction: true
-  SplitEmptyRecord: true
-  SplitEmptyNamespace: true
+BreakBeforeBraces: Attach
+BreakConstructorInitializers: BeforeColon
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortBlocksOnASingleLine: Never
+AllowShortLambdasOnASingleLine: All
+AllowShortEnumsOnASingleLine: false
 
 # --- Alignment ---
 AlignOperands: true
-AlignConsecutiveAssignments: false
-AlignConsecutiveDeclarations: false
-AlignTrailingComments: false
-AlignConsecutiveMacros: Consecutive
-AlignEscapedNewlines: Right
+AlignConsecutiveAssignments: None
+AlignConsecutiveDeclarations: None
+AlignTrailingComments: true
+AlignConsecutiveMacros: AcrossEmptyLinesAndComments
+AlignEscapedNewlines: Left
 AlignAfterOpenBracket: Align
 
-# --- Short Constructs ---
-AllowShortCaseLabelsOnASingleLine: true
-AllowShortIfStatementsOnASingleLine: false
-
 # --- Spaces ---
-SpacesInAngles: false
+SpacesInAngles: Never
 SpacesInParentheses: false
 SpacesInConditionalStatement: false
 SpacesInCStyleCastParentheses: false
-SpaceAfterCStyleCast: true
-SpaceAfterTemplateKeyword: false
-SpaceBeforeRangeBasedForLoopColon: false
+SpaceAfterCStyleCast: false
+SpaceAfterTemplateKeyword: true
+SpaceBeforeRangeBasedForLoopColon: true
 SpaceInEmptyParentheses: false
+SpaceBeforeParens: ControlStatements
+SpacesBeforeTrailingComments: 2
 
 # --- Includes ---
 IncludeIsMainRegex: '([-_](test|unittest))?$'
+
 IncludeCategories:
   - Regex: '^<.*\.h>'      # C system headers
     Priority: 1
   - Regex: '^<.*>'         # C++ standard library
     Priority: 2
-  - Regex: '^<.*\.hpp>'    # Third-party libraries
+  - Regex: '^".*\.h"'      # Project C headers
     Priority: 3
   - Regex: '^".*"'         # Project headers
     Priority: 4
+
 SortIncludes: CaseSensitive
 IncludeBlocks: Regroup
 
-# --- Macros ---
-MacroBlockBegin: ''
-MacroBlockEnd: ''
-
 # --- Newlines ---
 InsertNewlineAtEOF: true
-MaxEmptyLinesToKeep: 2
+MaxEmptyLinesToKeep: 1
 
-# C++11/14/17/20 specific
+# --- C++11/14/17/20 ---
 Cpp11BracedListStyle: true
 FixNamespaceComments: true
 SortUsingDeclarations: true
 
-# Pointer alignment
-PointerAlignment: Right
+# --- Pointer alignment ---
+PointerAlignment: Left
 DerivePointerAlignment: false
 
-# Short constructs
-AllowShortFunctionsOnASingleLine: Empty
-AllowShortLambdasOnASingleLine: All
-AllowShortBlocksOnASingleLine: Empty
-AllowShortEnumsOnASingleLine: false
-AllowShortLoopsOnASingleLine: false
+# --- Line Breaking Penalties ---
+PenaltyBreakAssignment: 2
+PenaltyBreakBeforeFirstCallParameter: 1
+PenaltyBreakComment: 300
+PenaltyBreakFirstLessLess: 120
+PenaltyBreakString: 1000
+PenaltyExcessCharacter: 1000000
+PenaltyReturnTypeOnItsOwnLine: 200
+
+# --- Other ---
+BinPackArguments: true
+BinPackParameters: true
+ConstructorInitializerIndentWidth: 4
+ReflowComments: true
 ...

@@ -240,7 +240,7 @@ private:
 };
 
 // Namespaces: PascalCase
-namespace Rhodo::Core {}
+namespace rhodo::Core {}
 ```
 
 #### Formatting
@@ -275,7 +275,7 @@ Use `#pragma once` for header guards:
 ```cpp
 #pragma once
 
-namespace Rhodo
+namespace rhodo
 {
     // Header content
 }

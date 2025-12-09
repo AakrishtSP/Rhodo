@@ -1,2 +1,1 @@
-export module Rhodo;
-
+export module rhodo;

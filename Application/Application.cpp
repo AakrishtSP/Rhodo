@@ -1,22 +1,21 @@
 #include <array>
 #include <vector>
-import Rhodo.Logger;
+import rhodo.logger;
 
-int main() {
-    Rhodo::Logger::coreLogger coreLogger;
-    Rhodo::Logger::appLogger appLogger;
+auto main() -> int {
+  rhodo::logger::coreLogger core_logger;
+  rhodo::logger::appLogger app_logger;
 
-    Rhodo::Logger::coreLogger::info("dasd");
+  rhodo::logger::coreLogger::info("dasd");
 
-    coreLogger.info("Hello World!");
+  core_logger.info("Hello World!");
 
-    int a = 5;
-    std::array v{1,2,3};
-    std::vector vv{1,2,3};
-    appLogger.info("int a {}", a);
-    appLogger.info("array v {}", v);
-    appLogger.info("vec vv {}", vv);
+  constexpr int kValueA{5};
+  std::array value_v{1, 2, 3};
+  std::vector value_vv{1, 2, 3};
+  app_logger.info("int a {}", kValueA);
+  app_logger.info("array v {}", value_v);
+  app_logger.info("vec vv {}", value_vv);
 
-    // Rhodo::Logger::flush();
-    return 0;
+  return 0;
 }
