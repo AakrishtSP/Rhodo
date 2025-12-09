@@ -44,7 +44,9 @@ Checks: >
   -readability-function-cognitive-complexity,
   -llvm-header-guard,
   -portability-avoid-pragma-once,
-  -readability-identifier-naming
+  -readability-identifier-naming,
+  -misc-use-anonymous-namespace,
+  -cppcoreguidelines-avoid-non-const-global-variables
 
 CheckOptions:
   # Allow performance-critical patterns

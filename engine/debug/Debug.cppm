@@ -27,43 +27,44 @@ using handlerT = void (*)(const char* expr, const std::source_location& loc,
 // ============ Core Assertion Functions ============
 
 // Debug assertions - stripped in release builds
-void DebugCheck(bool condition, const char* expr,
+auto DebugCheck(bool condition, const char* expr,
                 const std::source_location& loc     = std::source_location::current(),
-                const char*                 message = nullptr) noexcept;
+                const char*                 message = nullptr) noexcept -> void;
 
 // Verify - reports but doesn't abort (always enabled)
-void VerifyCheck(bool condition, const char* expr,
+auto VerifyCheck(bool condition, const char* expr,
                  const std::source_location& loc     = std::source_location::current(),
-                 const char*                 message = nullptr) noexcept;
+                 const char*                 message = nullptr) noexcept -> void;
 
 // Ensure - like to verify but for critical runtime checks
-void EnsureCheck(bool condition, const char* expr,
+auto EnsureCheck(bool condition, const char* expr,
                  const std::source_location& loc     = std::source_location::current(),
-                 const char*                 message = nullptr) noexcept;
+                 const char*                 message = nullptr) noexcept -> void;
 
 // Contract programming support
-void Precondition(bool condition, const char* expr,
+auto Precondition(bool condition, const char* expr,
                   const std::source_location& loc     = std::source_location::current(),
-                  const char*                 message = nullptr) noexcept;
+                  const char*                 message = nullptr) noexcept -> void;
 
-void Postcondition(bool condition, const char* expr,
+auto Postcondition(bool condition, const char* expr,
                    const std::source_location& loc     = std::source_location::current(),
-                   const char*                 message = nullptr) noexcept;
+                   const char*                 message = nullptr) noexcept -> void;
 
-void Invariant(bool condition, const char* expr,
+auto Invariant(bool condition, const char* expr,
                const std::source_location& loc     = std::source_location::current(),
-               const char*                 message = nullptr) noexcept;
+               const char*                 message = nullptr) noexcept -> void;
 
 // Unconditional panic - always aborts
-[[noreturn]] void Panic(const char*                 message,
-                        const std::source_location& loc = std::source_location::current()) noexcept;
+[[noreturn]] auto Panic(const char*                 message,
+                        const std::source_location& loc = std::source_location::current()) noexcept
+    -> void;
 
 // ============ Handler Management ============
-void SetPanicHandler(handlerT h) noexcept;
-void SetReportHandler(handlerT h) noexcept;
+auto SetPanicHandler(handlerT h) noexcept -> void;
+auto SetReportHandler(handlerT h) noexcept -> void;
 
-handlerT GetPanicHandler() noexcept;
-handlerT GetReportHandler() noexcept;
+auto GetPanicHandler() noexcept -> handlerT;
+auto GetReportHandler() noexcept -> handlerT;
 
 // ============ Performance Profiling ============
 class ScopedTimer {
@@ -77,7 +78,7 @@ class ScopedTimer {
       auto end      = std::chrono::high_resolution_clock::now();
       auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start_);
 
-      Logger::coreLogger::debug("[TIMER] {}: {} μs (at {}:{})", name_, duration.count(),
+      logger::CoreLogger::Debug("[TIMER] {}: {} μs (at {}:{})", name_, duration.count(),
                                 loc_.file_name(), loc_.line());
     }
   }
@@ -105,7 +106,7 @@ struct ScopeExit {
     }
   }
 
-  void Dismiss() noexcept { active = false; }
+  auto Dismiss() noexcept -> void { active = false; }
 
   ScopeExit(ScopeExit&& other) noexcept(std::is_nothrow_move_constructible_v<F>)
       : fn(std::move(other.fn)), active(other.active) {
@@ -165,16 +166,16 @@ ScopeSuccess(F) -> ScopeSuccess<F>;
 // ============ Memory Debugging ============
 class MemoryTracker {
  public:
-  static void RecordAllocation(
+  static auto RecordAllocation(
       void* /*ptr*/, size_t size,
-      const std::source_location& /*loc*/ = std::source_location::current()) noexcept {
+      const std::source_location& /*loc*/ = std::source_location::current()) noexcept -> void {
     if constexpr (kIsDebug) {
       g_total_allocated.fetch_add(size, std::memory_order_relaxed);
       g_allocation_count.fetch_add(1, std::memory_order_relaxed);
     }
   }
 
-  static void RecordDeallocation(void* /*ptr*/, size_t size) noexcept {
+  static auto RecordDeallocation(void* /*ptr*/, size_t size) noexcept -> void {
     if constexpr (kIsDebug) {
       g_total_freed.fetch_add(size, std::memory_order_relaxed);
       g_deallocation_count.fetch_add(1, std::memory_order_relaxed);
@@ -199,18 +200,18 @@ class MemoryTracker {
     return g_deallocation_count.load(std::memory_order_relaxed);
   }
 
-  static void Reset() noexcept {
+  static auto Reset() noexcept -> void {
     g_total_allocated.store(0, std::memory_order_relaxed);
     g_total_freed.store(0, std::memory_order_relaxed);
     g_allocation_count.store(0, std::memory_order_relaxed);
     g_deallocation_count.store(0, std::memory_order_relaxed);
   }
 
-  static void PrintStats() noexcept {
-    Logger::coreLogger::info(
+  static auto PrintStats() noexcept -> void {
+    logger::CoreLogger::Info(
         "[MEMORY] Allocated: {} bytes ({} allocs), "
         "Freed: {} bytes ({} frees), Net: {} bytes",
-        totalAllocated(), allocationCount(), totalFreed(), deallocationCount(), netAllocated());
+        TotalAllocated(), AllocationCount(), TotalFreed(), DeallocationCount(), NetAllocated());
   }
 
  private:
@@ -225,16 +226,16 @@ class MemoryTracker {
 // ==================== IMPLEMENTATION ====================
 
 namespace rhodo::asserts::detail {
-static inline handlerT g_g_panic_handler  = nullptr;
-static inline handlerT g_g_report_handler = nullptr;
+static inline handlerT g_panic_handler  = nullptr;
+static inline handlerT g_report_handler = nullptr;
 }   // namespace rhodo::asserts::detail
 namespace rhodo::asserts {
 
 // ===== Default Handlers =====
 
-static void DefaultPanicHandler(const char* expr, const std::source_location& loc,
-                                const char* message) noexcept {
-  Logger::coreLogger::critical(
+auto DefaultPanicHandler(const char* expr, const std::source_location& loc,
+                         const char* message) noexcept -> void {
+  logger::CoreLogger::Critical(
       "\n╔═══════════════════════════════════════════════════════════════╗\n"
       "║                        RHODO PANIC                            ║\n"
       "╚═══════════════════════════════════════════════════════════════╝\n"
@@ -245,108 +246,108 @@ static void DefaultPanicHandler(const char* expr, const std::source_location& lo
       expr ? expr : "(null)", loc.file_name(), loc.line(), loc.function_name(),
       message ? "Message:    " : "", message ? message : "");
 
-  Logger::coreLogger::flush();
+  logger::CoreLogger::Flush();
   std::abort();
 }
 
-static void DefaultReportHandler(const char* expr, const std::source_location& loc,
-                                 const char* message) noexcept {
-  Logger::coreLogger::error("[VERIFY FAILED] {} at {}:{}{}{}", expr ? expr : "(null)",
+auto DefaultReportHandler(const char* expr, const std::source_location& loc,
+                          const char* message) noexcept -> void {
+  logger::CoreLogger::Error("[VERIFY FAILED] {} at {}:{}{}{}", expr ? expr : "(null)",
                             loc.file_name(), loc.line(), message ? " - " : "",
                             message ? message : "");
 }
 
-static inline void EnsureDefaultsInstalled() noexcept {
-  if (!Detail::gPanicHandler) {
-    detail::g_g_panic_handler = &DefaultPanicHandler;
+inline auto EnsureDefaultsInstalled() noexcept -> void {
+  if (!detail::g_panic_handler) {
+    detail::g_panic_handler = &DefaultPanicHandler;
   }
-  if (!Detail::gReportHandler) {
-    detail::g_g_report_handler = &DefaultReportHandler;
+  if (!detail::g_report_handler) {
+    detail::g_report_handler = &DefaultReportHandler;
   }
 }
 
 // ===== Handler Management =====
 
-static void SetPanicHandler(handlerT h) noexcept {
+auto SetPanicHandler(handlerT h) noexcept -> void {
   EnsureDefaultsInstalled();
-  detail::g_g_panic_handler = h ? h : &DefaultPanicHandler;
+  detail::g_panic_handler = h ? h : &DefaultPanicHandler;
 }
 
-static void SetReportHandler(handlerT h) noexcept {
+auto SetReportHandler(const handlerT h) noexcept -> void {
   EnsureDefaultsInstalled();
-  detail::g_g_report_handler = h ? h : &DefaultReportHandler;
+  detail::g_report_handler = h ? h : &DefaultReportHandler;
 }
 
-static handlerT GetPanicHandler() noexcept {
+auto GetPanicHandler() noexcept -> handlerT {
   EnsureDefaultsInstalled();
-  return Detail::gPanicHandler;
+  return detail::g_panic_handler;
 }
 
-static handlerT GetReportHandler() noexcept {
+auto GetReportHandler() noexcept -> handlerT {
   EnsureDefaultsInstalled();
-  return Detail::gReportHandler;
+  return detail::g_report_handler;
 }
 
 // ===== Core Assertions =====
 
-static void DebugCheck(const bool kCondition, const char* expr, const std::source_location& loc,
-                       const char* message) noexcept {
-  if constexpr (!isDebug) {
-    (void)kCondition;
+void DebugCheck(const bool condition, const char* expr, const std::source_location& loc,
+                const char* message) noexcept {
+  if constexpr (!kIsDebug) {
+    (void)condition;
     (void)expr;
     (void)loc;
     (void)message;
   } else {
-    if (!kCondition) {
+    if (!condition) {
       EnsureDefaultsInstalled();
-      if (detail::g_g_panic_handler) {
-        detail::g_g_panic_handler(expr, loc, message);
+      if (detail::g_panic_handler) {
+        detail::g_panic_handler(expr, loc, message);
       }
       std::abort();
     }
   }
 }
 
-static void VerifyCheck(const bool kCondition, const char* expr, const std::source_location& loc,
-                        const char* message) noexcept {
-  if (!kCondition) {
+auto VerifyCheck(const bool condition, const char* expr, const std::source_location& loc,
+                 const char* message) noexcept -> void {
+  if (!condition) {
     EnsureDefaultsInstalled();
-    if (detail::g_g_report_handler) {
-      detail::g_g_report_handler(expr, loc, message);
+    if (detail::g_report_handler) {
+      detail::g_report_handler(expr, loc, message);
     }
   }
 }
 
-static void EnsureCheck(const bool kCondition, const char* expr, const std::source_location& loc,
-                        const char* message) noexcept {
-  if (!kCondition) {
+void EnsureCheck(const bool condition, const char* expr, const std::source_location& loc,
+                 const char* message) noexcept {
+  if (!condition) {
     EnsureDefaultsInstalled();
-    if (detail::g_g_panic_handler) {
-      detail::g_g_panic_handler(expr, loc, message);
+    if (detail::g_panic_handler) {
+      detail::g_panic_handler(expr, loc, message);
     }
     std::abort();
   }
 }
 
-static void Precondition(const bool kCondition, const char* expr, const std::source_location& loc,
-                         const char* message) noexcept {
-  DebugCheck(kCondition, expr, loc, message);
+auto Precondition(const bool condition, const char* expr, const std::source_location& loc,
+                  const char* message) noexcept -> void {
+  DebugCheck(condition, expr, loc, message);
 }
 
-static void Postcondition(const bool kCondition, const char* expr, const std::source_location& loc,
-                          const char* message) noexcept {
-  DebugCheck(kCondition, expr, loc, message);
+auto Postcondition(const bool condition, const char* expr, const std::source_location& loc,
+                   const char* message) noexcept -> void {
+  DebugCheck(condition, expr, loc, message);
 }
 
-static void Invariant(const bool kCondition, const char* expr, const std::source_location& loc,
-                      const char* message) noexcept {
-  DebugCheck(kCondition, expr, loc, message);
+auto Invariant(const bool condition, const char* expr, const std::source_location& loc,
+               const char* message) noexcept -> void {
+  DebugCheck(condition, expr, loc, message);
 }
 
-[[noreturn]] static void Panic(const char* message, const std::source_location& loc) noexcept {
+[[noreturn]] auto Panic(const char* message, const std::source_location& loc) noexcept -> void {
   EnsureDefaultsInstalled();
-  if (detail::g_g_panic_handler) {
-    detail::g_g_panic_handler("panic()", loc, message);
+  if (detail::g_panic_handler) {
+    detail::g_panic_handler("panic()", loc, message);
   }
   std::abort();
 }

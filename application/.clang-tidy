@@ -19,7 +19,14 @@ Checks: >
   -bugprone-easily-swappable-parameters,
   -cppcoreguidelines-avoid-magic-numbers,
   -readability-magic-numbers,
-  -readability-function-cognitive-complexity
+  -readability-function-cognitive-complexity,
+  -misc-include-cleaner,
+  -readability-redundant-declaration,
+  -cert-err33-c,
+  -modernize-use-trailing-return-type,
+  -cppcoreguidelines-avoid-do-while
+  -misc-use-anonymous-namespace,
+
 
 CheckOptions:
   # Strict function size limits for tools

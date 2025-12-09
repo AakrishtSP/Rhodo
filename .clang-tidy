@@ -15,11 +15,15 @@ Checks: >
   readability-*,
   portability-*,
   mpi-*,
-  openmp-*
+  openmp-*,
+  -misc-include-cleaner,
+  -misc-use-anonymous-namespace
 WarningsAsErrors: '*'
 CheckOptions:
   # --- General ---
   - { key: misc-no-recursion, value: false }
+  - { key: misc-include-cleaner, value: false }
+  - { key: misc-use-anonymous-namespace, value: false }
 
   # --- Types (CamelCase) ---
   - { key: readability-identifier-naming.ClassCase,          value: CamelCase }

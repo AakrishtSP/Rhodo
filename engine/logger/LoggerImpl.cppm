@@ -24,18 +24,18 @@ export module Rhodo.Logger:Impl;
 import :Structures;
 
 namespace rhodo::logger::impl {
-inline static bool g_backend_initialized = false;
+static bool g_backend_initialized = false;
 
-inline void EnsureBackendStarted() {
+static auto EnsureBackendStarted() -> void {
   if (!g_backend_initialized) [[unlikely]] {
     g_backend_initialized = true;
     quill::Backend::start();
-    std::atexit([]() { quill::Backend::stop(); });
+    static_cast<void>(std::atexit([]() -> void { quill::Backend::stop(); }));
   }
 }
 
-inline auto ToQuillLevel(const LogLevel kLevel) -> quill::LogLevel {
-  switch (kLevel) {
+static auto ToQuillLevel(const LogLevel level) -> quill::LogLevel {
+  switch (level) {
     case LogLevel::TraceL3:
       return quill::LogLevel::TraceL3;
     case LogLevel::TraceL2:
@@ -63,14 +63,18 @@ inline auto ToQuillLevel(const LogLevel kLevel) -> quill::LogLevel {
 class LoggerImpl {
  public:
   LoggerImpl() = delete;
+  LoggerImpl(const LoggerImpl&)                    = delete;
+  LoggerImpl(LoggerImpl&&)                         = delete;
+  auto operator=(const LoggerImpl&) -> LoggerImpl& = delete;
+  auto operator=(LoggerImpl&&) -> LoggerImpl&      = delete;
 
   ~LoggerImpl() = default;
 
   explicit LoggerImpl(const LoggerConfig& config);
 
-  auto Log(LogLevel level, const char* fmt, auto&&... args) -> void;
+  auto Log(LogLevel k_level, const char* fmt, auto&&... args) -> void;
 
-  auto SetLevel(LogLevel level) const -> void;
+  auto SetLevel(LogLevel k_level) const -> void;
 
   auto Flush() const -> void;
 
@@ -98,20 +102,20 @@ LoggerImpl::LoggerImpl(const LoggerConfig& config) {
   logger_->set_log_level(ToQuillLevel(config.default_level));
 }
 
-auto LoggerImpl::Log(const LogLevel level, const char* fmt, auto&&... args) -> void {
-  if (logger_) [[likely]] {
-    QUILL_LOG_DYNAMIC(logger_, ToQuillLevel(level), fmt, std::forward<decltype(args)>(args)...);
+auto LoggerImpl::Log(const LogLevel k_level, const char* fmt, auto&&... args) -> void {
+  if (logger_ != nullptr) [[likely]] {
+    QUILL_LOG_DYNAMIC(logger_, ToQuillLevel(k_level), fmt, std::forward<decltype(args)>(args)...);
   }
 }
 
-auto LoggerImpl::SetLevel(const LogLevel level) const -> void {
-  if (logger_) {
-    logger_->set_log_level(ToQuillLevel(level));
+auto LoggerImpl::SetLevel(const LogLevel k_level) const -> void {
+  if (logger_ != nullptr) {
+    logger_->set_log_level(ToQuillLevel(k_level));
   }
 }
 
 auto LoggerImpl::Flush() const -> void {
-  if (logger_) [[likely]] {
+  if (logger_ != nullptr) [[likely]] {
     logger_->flush_log();
   }
 }

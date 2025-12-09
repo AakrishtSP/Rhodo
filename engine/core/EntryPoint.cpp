@@ -1,5 +1,7 @@
 import Rhodo.Logger;
 
-auto main(int argc, char** argv) -> int {
-  rhodo::logger::coreLogger::info("Hello World! from core");
+auto main(const int argc, char** argv) -> int {
+  (void)argc;
+  (void)argv;
+  // rhodo::logger::CoreLogger::Info("Hello World! from core");
 }
