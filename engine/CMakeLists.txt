@@ -1,27 +1,30 @@
-add_subdirectory(Core)
-add_subdirectory(Logger)
-add_subdirectory(Signals)
+add_subdirectory(logger)
+add_subdirectory(signals)
+add_subdirectory(debug)
+add_subdirectory(core)
+
 
 # Create static library
 add_library(Rhodo STATIC)
 
 target_sources(Rhodo
-PUBLIC
+        PUBLIC
         FILE_SET CXX_MODULES BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} FILES
-                Rhodo.cppm
+        Rhodo.cppm
 )
 
 # Link libraries
 target_link_libraries(Rhodo
-PUBLIC
-        RhodoCore
+        PUBLIC
         RhodoLogger
         RhodoSignals
+        RhodoDebug
+        RhodoCore
 )
 
 # Build configuration defines (works with both single-config and multi-config generators)
 target_compile_definitions(Rhodo
-PRIVATE
+        PRIVATE
         RH_BUILD_STATIC
 
         # Debug configuration
@@ -36,3 +39,8 @@ PRIVATE
 
 # Set output directories
 set_target_output_dirs(Rhodo)
+
+# Register engine-specific clang-tidy config (performance-first LLVM style)
+register_tidy_config(Rhodo ${CMAKE_CURRENT_SOURCE_DIR})
+
+register_code_quality(Rhodo)

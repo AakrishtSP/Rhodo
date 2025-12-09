@@ -1,14 +1,9 @@
 module;
-#include <string>
-#include <utility>
-#include <vector>
 
-#include "quill/Logger.h"
+export module Rhodo.Logger;
 
-export module rhodo.logger;
-
-export import :structures;
-import :impl;
+export import :Structures;
+import :Impl;
 
 export namespace rhodo::logger {
 
@@ -26,8 +21,7 @@ class Logger {
   RHODO_LOG_LEVEL(trace_l2)
   RHODO_LOG_LEVEL(trace_l1)
   static void trace(const char* fmt, auto&&... args) {
-    getInstance().log(logLevel::trace_l1, fmt,
-                      std::forward<decltype(args)>(args)...);
+    getInstance().log(logLevel::trace_l1, fmt, std::forward<decltype(args)>(args)...);
   }
   RHODO_LOG_LEVEL(debug)
   RHODO_LOG_LEVEL(info)
@@ -49,27 +43,25 @@ class Logger {
 
 // Logger tags with embedded configuration
 struct CoreTag {
-  static LoggerConfig config() {
+  static LoggerConfig Config() {
     return {
-        .name = "Core",
-        .sinks = {{sinkType::file, "Rhodo.log"},
-                  {sinkType::console, "console"}},
+        .name         = "Core",
+        .sinks        = {{sinkType::file, "Rhodo.log"}, {sinkType::console, "console"}},
         .defaultLevel = logLevel::debug,
     };
   }
 };
 
 struct AppTag {
-  static LoggerConfig config() {
-    return {.name = "App",
-            .sinks = {{sinkType::file, "Rhodo.log"},
-                      {sinkType::console, "console"}},
+  static LoggerConfig Config() {
+    return {.name         = "App",
+            .sinks        = {{sinkType::file, "Rhodo.log"}, {sinkType::console, "console"}},
             .defaultLevel = logLevel::debug};
   }
 };
 
 // Convenient type aliases
-using coreLogger = Logger<CoreTag>;
-using appLogger = Logger<AppTag>;
+using CoreLogger = Logger<CoreTag>;
+using AppLogger  = Logger<AppTag>;
 
-}  // namespace rhodo::logger
+}   // namespace rhodo::logger

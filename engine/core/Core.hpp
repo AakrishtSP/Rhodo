@@ -18,4 +18,4 @@ template <typename T, typename... Args>
 constexpr ref<T> createRef(Args&&... args) {
   return std::make_shared<T>(std::forward<Args>(args)...);
 }
-}  // namespace rhodo
+}   // namespace rhodo

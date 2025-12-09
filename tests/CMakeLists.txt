@@ -3,13 +3,13 @@ project(RhodoTests LANGUAGES C CXX)
 
 include(${CMAKE_SOURCE_DIR}/thirdparty/Catch2/Catch2.cmake)
 
-add_subdirectory(Application)
-add_subdirectory(Rhodo)
+add_subdirectory(application)
+add_subdirectory(engine)
 
 add_executable(RhodoTests)
 
 target_link_libraries(RhodoTests
-    PRIVATE
+        PRIVATE
         TestsApplication
         TestsRhodoSignals
         Rhodo

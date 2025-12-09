@@ -1,53 +1,59 @@
 
 # Create executable
-add_executable(Application 
-    Application.cpp
+add_executable(Application
+        Application.cpp
 )
 
 # Include directories
 target_include_directories(Application
-    PRIVATE 
+        PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 # Compile definitions
 target_compile_definitions(Application
-    PRIVATE 
+        PRIVATE
         RH_IMPORT_STATIC
 )
 
 # Link Rhodo library (automatically inherits PUBLIC includes and dependencies)
 target_link_libraries(Application
-    PRIVATE 
+        PRIVATE
         Rhodo
 )
 
 # Set output directories
 set_target_output_dirs(Application)
 
+# Register application-specific clang-tidy config (safety-first Google style)
+register_tidy_config(Application ${CMAKE_CURRENT_SOURCE_DIR})
+
+# Register for code quality tools
+register_code_quality(Application)
+
 # === HYBRID ASSET MANAGEMENT ===
 # Development: Working directory points to source (live editing)
 # Production: Assets copied to build directory (bundled)
 
 # Set working directory to source folder for development (live asset editing)
-set_target_properties(Application PROPERTIES 
-    VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+set_target_properties(Application PROPERTIES
+        VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 # Copy assets for production builds (Release/RelWithDebInfo only)
 set(ASSETS_DIR ${CMAKE_SOURCE_DIR}/assets)
-if(EXISTS ${ASSETS_DIR})
+if (EXISTS ${ASSETS_DIR})
     # Generator expression: only run copy command for Release-type builds
     add_custom_command(TARGET Application POST_BUILD
-        COMMAND $<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>:${CMAKE_COMMAND}>
-        ARGS -E copy_directory 
+            COMMAND $<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>:${CMAKE_COMMAND}>
+            ARGS -E copy_directory
             ${ASSETS_DIR}
             $<TARGET_FILE_DIR:Application>/assets
-        COMMENT "Bundling assets for production build..."
+            COMMENT "Bundling assets for production build..."
     )
     message(STATUS "Assets found at: ${ASSETS_DIR}")
     message(STATUS "  - Debug builds: Live assets (no copy)")
     message(STATUS "  - Release builds: Assets will be bundled")
-else()
+else ()
     message(WARNING "Assets directory not found at: ${ASSETS_DIR}")
-endif()
+endif ()

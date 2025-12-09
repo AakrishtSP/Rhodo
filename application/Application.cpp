@@ -1,6 +1,6 @@
 #include <array>
 #include <vector>
-import rhodo.logger;
+import Rhodo.Logger;
 
 auto main() -> int {
   rhodo::logger::coreLogger core_logger;

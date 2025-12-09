@@ -1,9 +1,13 @@
 // #define CATCH_CONFIG_MAIN
 #include <atomic>
-#include <catch2/catch_all.hpp>
-#include <chrono>
+#include <cstdint>
+#include <sstream>
+#include <stdexcept>
+#include <string>
 #include <thread>
-import rhodo.signals;
+
+#include "catch2/catch_test_macros.hpp"
+import Rhodo.Signals;
 
 using namespace rhodo;
 using namespace std::chrono_literals;
@@ -15,7 +19,9 @@ template <typename T>
 struct Counter {
   std::atomic<T> value{0};
   void operator()(T v) { value.fetch_add(v, std::memory_order_relaxed); }
-  [[nodiscard]] T get() const { return value.load(std::memory_order_relaxed); }
+  [[nodiscard]] auto Get() const -> T {
+    return value.load(std::memory_order_relaxed);
+  }
 };
 
 // -----------------------------------------------------------------------------
@@ -25,7 +31,7 @@ TEST_CASE("Signal basic connect/emit/disconnect", "[Signal]") {
   Signal<int> sig;
   int called = 0;
 
-  auto id = sig.connect([&called](int v) { called += v; });
+  auto id = sig.connect([&called](int v) -> void { called += v; });
   sig.emit(5);
   REQUIRE(called == 5);
 
@@ -39,17 +45,17 @@ TEST_CASE("Signal basic connect/emit/disconnect", "[Signal]") {
 // -----------------------------------------------------------------------------
 TEST_CASE("ScopedConnection auto-disconnects", "[ScopedConnection]") {
   Signal<> sig;
-  int count = 0;
+  int const kCount = 0;
 
   {
     [[maybe_unused]] auto conn = Signals::makeScopedConnection(
         sig, std::function<void()>{[&count] { ++count; }});
     sig.emit();
-    REQUIRE(count == 1);
+    REQUIRE(kCount == 1);
   }  // conn destroyed here
 
   sig.emit();
-  REQUIRE(count == 1);  // still 1
+  REQUIRE(kCount == 1);  // still 1
 }
 
 // -----------------------------------------------------------------------------
@@ -57,14 +63,14 @@ TEST_CASE("ScopedConnection auto-disconnects", "[ScopedConnection]") {
 // -----------------------------------------------------------------------------
 struct Receiver {
   int sum = 0;
-  void add(int v) { sum += v; }
+  void Add(int v) { sum += v; }
 };
 
 TEST_CASE("Signal member function connection", "[Signal]") {
   Signal<int> sig;
   Receiver r;
 
-  auto id = sig.connect(r, &Receiver::add);
+  auto id = sig.connect(r, &Receiver::Add);
   sig.emit(7);
   REQUIRE(r.sum == 7);
 
@@ -80,7 +86,7 @@ TEST_CASE("Signal operator() alias", "[Signal]") {
   Signal<std::string> sig;
   std::string result;
 
-  sig.connect([&result](const std::string& s) { result = s; });
+  sig.connect([&result](const std::string& s) -> void { result = s; });
   sig("hello");
   REQUIRE(result == "hello");
 }
@@ -93,7 +99,7 @@ TEST_CASE("Signal size and empty", "[Signal]") {
   REQUIRE(sig.empty());
   REQUIRE(sig.size() == 0);
 
-  auto id = sig.connect([] {});
+  auto id = sig.connect([] -> void {});
   REQUIRE(!sig.empty());
   REQUIRE(sig.size() == 1);
 
@@ -109,8 +115,8 @@ TEST_CASE("Signal disconnect_all", "[Signal]") {
   Signal<int> sig;
   std::vector<int> logs;
 
-  sig.connect([&logs](int v) { logs.push_back(v); });
-  sig.connect([&logs](int v) { logs.push_back(v * 2); });
+  sig.connect([&logs](int v) -> void { logs.push_back(v); });
+  sig.connect([&logs](int v) -> void { logs.push_back(v * 2); });
 
   sig.emit(1);
   REQUIRE(logs == std::vector<int>{1, 2});
@@ -127,7 +133,7 @@ TEST_CASE("Signal blocking_emit guarantees delivery", "[Signal]") {
   Signal<> sig;
   std::atomic<int> counter{0};
 
-  sig.connect([&] { ++counter; });
+  sig.connect([&] -> void { ++counter; });
   sig.blockingEmit();
   REQUIRE(counter == 1);
 
@@ -144,20 +150,21 @@ TEST_CASE("Signal concurrent emit is safe", "[Signal][thread]") {
   Signal<int> sig;
   Counter<int> total;
 
-  sig.connect([&total](int x) { total(x); });
+  sig.connect([&total](int x) -> void { total(x); });
 
-  constexpr int N = 100'000;
+  constexpr int kN = 100'000;
   std::vector<std::thread> threads;
   for (int i = 0; i < 4; ++i) {
-    threads.emplace_back([&sig, N] {
-      for (int j = 0; j < N; ++j)
+    threads.emplace_back([&sig, kN] -> void {
+      for (int j = 0; j < kN; ++j) {
         sig.emit(1);
+      }
     });
   }
 
   for (auto& t : threads)
     t.join();
-  REQUIRE(total.get() == 4 * N);
+  REQUIRE(total.get() == 4 * kN);
 }
 
 // -----------------------------------------------------------------------------
@@ -168,16 +175,17 @@ TEST_CASE("Signal connect/disconnect while emitting", "[Signal][thread]") {
   std::atomic<int> emitted{0};
   std::atomic<bool> stop{false};
 
-  auto id = sig.connect([&] { ++emitted; });
+  auto id = sig.connect([&] -> void { ++emitted; });
 
-  std::thread emitter([&] {
-    while (!stop)
+  std::thread emitter([&] -> void {
+    while (!stop) {
       sig.emit();
+    }
   });
 
   // Hammer connect/disconnect
   for (int i = 0; i < 50'000; ++i) {
-    auto newId = sig.connect([] {});
+    auto new_id = sig.connect([] -> void {});
     sig.disconnect(newId);
   }
 
@@ -192,15 +200,15 @@ TEST_CASE("Signal connect/disconnect while emitting", "[Signal][thread]") {
 // -----------------------------------------------------------------------------
 TEST_CASE("Signal batched cleanup respects threshold", "[Signal]") {
   Signal<> sig;
-  constexpr uint32_t THRESH = Signal<>::cleanup_threshold;
+  constexpr uint32_t kThresh = Signal<>::cleanup_threshold = 0;
 
   std::vector<slotId> ids;
-  for (uint32_t i = 0; i < THRESH * 2; ++i) {
-    ids.push_back(sig.connect([] {}));
+  for (uint32_t i = 0; i < kThresh * 2; ++i) {
+    ids.push_back(sig.connect([] -> void {}));
   }
 
   // Disconnect half + 1 → should trigger cleanup on the next emit
-  for (uint32_t i = 0; i < THRESH + 1; ++i) {
+  for (uint32_t i = 0; i < kThresh + 1; ++i) {
     sig.disconnect(ids[i]);
   }
 
@@ -208,7 +216,7 @@ TEST_CASE("Signal batched cleanup respects threshold", "[Signal]") {
   sig.emit();
 
   // After cleanup, slots_ should contain only active ones
-  REQUIRE(sig.size() == ids.size() - (THRESH + 1));
+  REQUIRE(sig.size() == ids.size() - (kThresh + 1));
 }
 
 // -----------------------------------------------------------------------------
@@ -216,7 +224,7 @@ TEST_CASE("Signal batched cleanup respects threshold", "[Signal]") {
 // -----------------------------------------------------------------------------
 TEST_CASE("Signal force_cleanup removes dead slots immediately", "[Signal]") {
   Signal<> sig;
-  auto id = sig.connect([] {});
+  auto id = sig.connect([] -> void {});
   sig.disconnect(id);
   REQUIRE(sig.containerSize() == 1);  // still in container
 
@@ -240,8 +248,8 @@ TEST_CASE("SignalHub get/create/remove", "[SignalHub]") {
 }
 
 TEST_CASE("SignalHub type safety", "[SignalHub]") {
-  auto& sInt = Signals::get<int>("mixed");
-  auto& sFloat = Signals::get<float>("mixed");
+  auto& s_int = Signals::get<int>("mixed");
+  auto& s_float = Signals::get<float>("mixed");
 
   REQUIRE(
       reinterpret_cast<void*>(&sInt) !=
@@ -265,7 +273,7 @@ TEST_CASE("SignalHub cleanup_empty_signals", "[SignalHub]") {
 TEST_CASE("Global Signals helpers", "[Signals]") {
   auto& sig = Signals::get<std::string>("log");
   std::ostringstream oss;
-  sig.connect([&oss](const std::string& m) { oss << m; });
+  sig.connect([&oss](const std::string& m) -> void { oss << m; });
 
   sig.emit("hello");
   REQUIRE(oss.str() == "hello");
@@ -279,8 +287,8 @@ TEST_CASE("Global Signals helpers", "[Signals]") {
 // -----------------------------------------------------------------------------
 TEST_CASE("Signal exception safety", "[Signal]") {
   Signal<int> sig;
-  sig.connect([](int) { throw std::runtime_error("boom"); });
-  sig.connect([](int v) { /* ignore */ });
+  sig.connect([](int) -> void { throw std::runtime_error("boom"); });
+  sig.connect([](int v) -> void { /* ignore */ });
 
   REQUIRE_NOTHROW(sig.emit(0));  // one throws, other still called
   REQUIRE_NOTHROW(sig.blockingEmit(0));

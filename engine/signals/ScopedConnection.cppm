@@ -1,79 +1,77 @@
-export module rhodo.signals:scoped_connection;
+export module Rhodo.Signals:ScopedConnection;
 
-import :signal;
+import :Signal;
 
 export namespace rhodo {
 template <typename... Args>
 class ScopedConnection {
  public:
   ScopedConnection() noexcept;
-  ScopedConnection(Signal<Args...>& signal, slotId id) noexcept;
+  ScopedConnection(Signal<Args...>& signal, SlotId slot_id) noexcept;
   ~ScopedConnection() noexcept;
 
   // Move-only semantics
   ScopedConnection(ScopedConnection&& other) noexcept;
-  ScopedConnection& operator=(ScopedConnection&& other) noexcept;
-  ScopedConnection(const ScopedConnection&) = delete;
-  ScopedConnection& operator=(const ScopedConnection&) = delete;
+  auto operator=(ScopedConnection&& other) noexcept -> ScopedConnection&;
+  ScopedConnection(const ScopedConnection&)                    = delete;
+  auto operator=(const ScopedConnection&) -> ScopedConnection& = delete;
 
-  void disconnect() noexcept;
-  [[nodiscard]] bool connected() const noexcept;
+  auto                   Disconnect() noexcept -> void;
+  [[nodiscard]] auto     Connected() const noexcept -> bool;
   [[nodiscard]] explicit operator bool() const noexcept;
 
  private:
   Signal<Args...>* signal_ = nullptr;
-  slotId id_ = 0;
+  SlotId           id_     = 0;
 };
 
 template <typename... Args>
 ScopedConnection<Args...>::ScopedConnection() noexcept = default;
 
 template <typename... Args>
-ScopedConnection<Args...>::ScopedConnection(Signal<Args...>& signal,
-                                            const slotId id) noexcept
-    : signal_(&signal), id_(id) {}
+ScopedConnection<Args...>::ScopedConnection(Signal<Args...>& signal, const SlotId slot_id) noexcept
+    : signal_(&signal), id_(slot_id) {}
 
 template <typename... Args>
 ScopedConnection<Args...>::~ScopedConnection() noexcept {
-  disconnect();
+  Disconnect();
 }
 
 template <typename... Args>
 ScopedConnection<Args...>::ScopedConnection(ScopedConnection&& other) noexcept
     : signal_(other.signal_), id_(other.id_) {
   other.signal_ = nullptr;
-  other.id_ = 0;
+  other.id_     = 0;
 }
 
 template <typename... Args>
-ScopedConnection<Args...>& ScopedConnection<Args...>::operator=(
-    ScopedConnection&& other) noexcept {
+auto ScopedConnection<Args...>::operator=(ScopedConnection&& other) noexcept -> ScopedConnection& {
   if (this != &other) {
-    disconnect();
-    signal_ = other.signal_;
-    id_ = other.id_;
+    Disconnect();
+    signal_       = other.signal_;
+    id_           = other.id_;
     other.signal_ = nullptr;
-    other.id_ = 0;
+    other.id_     = 0;
   }
   return *this;
 }
 
 template <typename... Args>
-void ScopedConnection<Args...>::disconnect() noexcept {
+auto ScopedConnection<Args...>::Disconnect() noexcept -> void {
   if (signal_) {
     signal_->disconnect(id_);
     signal_ = nullptr;
-    id_ = 0;
+    id_     = 0;
   }
 }
 
 template <typename... Args>
-bool ScopedConnection<Args...>::connected() const noexcept {
+auto ScopedConnection<Args...>::Connected() const noexcept -> bool {
   return signal_ != nullptr;
 }
 
 template <typename... Args>
 ScopedConnection<Args...>::operator bool() const noexcept {
-  return connected();
+  return Connected();
 }
-}  // namespace rhodo
+}   // namespace rhodo
