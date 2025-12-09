@@ -1,0 +1,22 @@
+---
+# Rhodo Engine Core - Performance-Optimized Formatting
+# Slightly relaxed for SIMD, cache alignment, and hot-path readability
+BasedOnStyle: InheritParentConfig
+Language: Cpp
+
+# Slightly wider for performance-critical code with SIMD/intrinsics
+ColumnLimit: 100
+
+# Allow longer functions in engine code
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortLambdasOnASingleLine: All
+
+# Better for data-oriented design
+AlignConsecutiveAssignments: Consecutive
+AlignConsecutiveDeclarations: Consecutive
+
+# More readable for low-level code
+SpacesBeforeTrailingComments: 3
+
+# Everything else inherits from root
+...

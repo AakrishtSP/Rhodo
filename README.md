@@ -2,11 +2,12 @@
 
 # 🎮 Rhodo Game Engine
 
-**A modern, cross-platform game engine built with C++17**
+**A modern, high-performance game engine built with C++23 and C++20 Modules**
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![CMake](https://img.shields.io/badge/CMake-3.31+-green.svg)](https://cmake.org/)
-[![C++](https://img.shields.io/badge/C++-17-blue.svg)](https://isocpp.org/)
+[![CMake](https://img.shields.io/badge/CMake-3.30+-green.svg)](https://cmake.org/)
+[![C++](https://img.shields.io/badge/C++-23-blue.svg)](https://isocpp.org/)
+[![Modules](https://img.shields.io/badge/C%2B%2B20-Modules-brightgreen.svg)](https://en.cppreference.com/w/cpp/language/modules)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](https://github.com/AakrishtSP/Rhodo)
 
 </div>
@@ -17,36 +18,191 @@
 
 - [About](#about)
 - [Features](#features)
-- [Roadmap](#roadmap)
+- [Code Quality](#code-quality)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Building](#building)
-  - [Running Examples](#running-examples)
+  - [Development Setup](#development-setup)
 - [Project Structure](#project-structure)
-- [Development Status](#development-status)
 - [Contributing](#contributing)
 - [License](#license)
-- [Contact](#contact)
 
 ---
 
 ## 🎯 About
 
-Rhodo is an ambitious, open-source game engine designed for flexibility, performance, and cross-platform compatibility. Built from the ground up with modern C++ practices, Rhodo aims to provide developers with a robust foundation for creating 2D and 3D games that run on desktop platforms and the web.
+Rhodo is a professional, open-source game engine designed for **performance**, **modularity**, and **cross-platform
+compatibility**. Built with modern C++23 and C++20 modules, Rhodo provides developers with a production-ready foundation
+for creating high-performance games.
 
-The engine is currently in **active development**, following a phased approach to ensure each component is properly architected and tested.
+The engine emphasizes:
+
+- **Zero-cost abstractions** through compile-time optimization
+- **Modular architecture** with C++20 module support
+- **Data-oriented design** for cache efficiency
+- **CI/CD-ready** with strict code quality enforcement
+- **Studio-grade tooling** (clang-tidy, clang-format, CMake)
 
 ---
 
 ## ✨ Features
 
-### Current Features
-- **🔧 Core Infrastructure**
-  - Cross-platform support (Windows, Linux, macOS)
-  - Flexible logging system with multiple severity levels
-  - Type-safe signal/event system for decoupled communication
-  - Precompiled header support for faster compilation
-  - CMake-based build system
+### Core Infrastructure
+
+- **🔧 C++23 with Modules** - Modern C++20 module system for fast, clean compilation
+- **📦 Module-Aware Build** - First-class support for C++20 modules with BMI generation
+- **🔍 Type-Safe Signals** - Zero-overhead event system with compile-time type checking
+- **📝 Structured Logging** - High-performance logging with Quill backend
+- **🏗️ ECS-Ready** - Entity Component System support via module interfaces
+- **🌍 Cross-Platform** - Windows, Linux, macOS with unified API
+
+### Developer Experience
+
+- **⚡ Fast Iteration** - Module-aware incremental compilation
+- **🔬 Code Quality** - Automated clang-tidy + clang-format enforcement
+- **📊 Per-Directory Policies** - Engine (performance) vs Tools (safety) profiles
+- **🚀 CI/CD Ready** - GitHub Actions workflow with strict gates
+- **📚 Comprehensive Docs** - Architecture guides, API reference, best practices
+
+---
+
+## 🛡️ Code Quality
+
+Rhodo enforces **production-grade code quality** at 4 layers:
+
+### Layer 1: CMake (Configure Time)
+
+- ✅ File/directory naming validation
+- ✅ PascalCase module naming enforcement
+- ✅ Hierarchical module structure validation
+
+### Layer 2: clang-tidy (Build Time)
+
+- ✅ Symbol naming (classes, variables, constants)
+- ✅ Code patterns & best practices
+- ✅ Per-directory profiles (engine vs tools)
+
+### Layer 3: Git Pre-Commit (Local)
+
+- ✅ Format validation (clang-format)
+- ✅ CMake configuration check
+- ✅ Trailing whitespace detection
+
+### Layer 4: CI/CD (Remote)
+
+- ✅ Complete validation pipeline
+- ✅ Unit test suite
+- ✅ Full clang-tidy analysis
+
+**Result:** Impossible to merge code violating standards.
+
+See [Code Quality Documentation](docs/CODE_QUALITY.md) for details.
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- **CMake** 3.30 or later
+- **C++23 Compiler**:
+    - Clang 17+ (recommended)
+    - GCC 13+
+    - MSVC 17.4+
+- **Ninja** (recommended) or Make
+
+### Quick Build
+
+```bash
+# Clone repository
+git clone https://github.com/AakrishtSP/Rhodo.git
+cd Rhodo
+
+# Configure
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
+
+# Build
+cmake --build build
+
+# Run tests
+ctest --test-dir build
+```
+
+### Development Setup
+
+```bash
+# Full setup with code quality enabled
+cmake -S . -B build \
+  -G Ninja \
+  -DCMAKE_BUILD_TYPE=Debug \
+  -DRH_ENABLE_CLANG_TIDY=ON \
+  -DRH_ENABLE_CLANG_FORMAT=ON \
+  -DRH_ENABLE_ASSERTS=ON
+
+# Format all code
+ninja -C build format
+
+# Run static analysis
+ninja -C build tidy
+
+# Auto-fix issues
+ninja -C build fix
+```
+
+---
+
+## 📁 Project Structure
+
+```
+rhodo/
+├── engine/                  # Engine Core (C++20 Modules)
+│   ├── Rhodo.cppm          # root module
+│   ├── core/               # Core systems
+│   ├── debug/              # Debug assertions
+│   ├── logger/             # Logging system
+│   └── signals/            # Event system
+├── application/            # Editor & Tools (relaxed standards)
+├── tests/                  # Unit tests
+├── cmake/                  # CMake modules
+│   ├── ClangTidy.cmake
+│   ├── ClangFormat.cmake
+│   └── EnforceLayout.cmake
+├── docs/                   # Documentation
+│   ├── CODE_QUALITY.md
+│   ├── ENFORCEMENT.md
+│   └── MODULE_NAMING.md
+└── CMakeLists.txt
+```
+
+---
+
+## 📖 Documentation
+
+- **[Code Quality Architecture](docs/CODE_QUALITY.md)** - Style profiles, check configuration
+- **[Enforcement System](docs/ENFORCEMENT.md)** - Naming conventions, CI validation
+- **[Module Naming](docs/MODULE_NAMING.md)** - PascalCase hierarchical modules
+- **[Quick Reference](docs/ENFORCEMENT_QUICK.md)** - Commands and common patterns
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+**Quick Start:**
+
+1. Fork the repository
+2. Create a feature branch
+3. Follow [coding standards](docs/CODE_QUALITY.md)
+4. Submit a pull request
+
+**Before committing:**
+
+```bash
+ninja fix           # Auto-format and fix issues
+git add -A
+git commit          # Pre-commit hook validates
+```
 
 ### Planned Features
 - **🎨 Rendering**
@@ -226,24 +382,30 @@ Or run the test executable directly:
 
 ---
 
-## 📁 Project Structure
+## 📁 Complete Project Structure
 
 ```
-Rhodo/
-├── Rhodo/              # Core engine library
-│   ├── include/        # Public headers
-│   │   └── Rhodo/
-│   │       ├── Core/   # Core engine systems
-│   │       └── Signals/ # Event/signal system
-│   └── src/            # Implementation files
-│       └── Core/
-├── Examples/           # Example applications
-│   └── src/
-├── Tests/              # Unit tests
-├── CMakeLists.txt      # Root CMake configuration
-├── LICENSE             # Apache 2.0 license
-├── README.md           # This file
-└── CONTRIBUTING.md     # Contribution guidelines
+.
+├── engine/             # Core engine library
+│   ├── Rhodo.cppm     # Root module
+│   ├── core/          # Core engine systems
+│   ├── debug/         # Debug utilities
+│   ├── logger/        # Logging system
+│   ├── signals/       # Event/signal system
+│   └── CMakeLists.txt
+├── application/       # Editor & tools
+│   ├── Application.cpp
+│   └── CMakeLists.txt
+├── tests/             # Unit tests
+│   ├── engine/
+│   ├── application/
+│   └── CMakeLists.txt
+├── cmake/             # Build system utilities
+├── docs/              # Documentation
+├── CMakeLists.txt     # Root CMake configuration
+├── LICENSE            # Apache 2.0 license
+├── README.md          # This file
+└── CONTRIBUTING.md    # Contribution guidelines
 ```
 
 ---

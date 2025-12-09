@@ -1,23 +1,38 @@
 cmake_minimum_required(VERSION 3.30)
 
-project(RhodoEngine LANGUAGES C CXX)
+project(RhodoEngine
+        VERSION 0.1.0
+        DESCRIPTION "Modern C++23 Game Engine with Module Support"
+        LANGUAGES C CXX
+)
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/thirdparty/")
+# Export compile commands for IDE and tools
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-if(${CMAKE_BUILD_TYPE} STREQUAL "")
-    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type" FORCE)
+# Add custom module paths
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/thirdparty/")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
+
+# Set default build type if not specified
+if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    message(STATUS "Setting build type to 'Release' as none was specified")
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build" FORCE)
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
 
-if(${CMAKE_BUILD_TYPE} STREQUAL "Debug" OR ${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo")
-    message("Enabling Rhodo assertions...")
+# Enable assertions for Debug and RelWithDebInfo builds
+if (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+    message(STATUS "Enabling Rhodo assertions for ${CMAKE_BUILD_TYPE} build")
     add_compile_definitions(RH_ENABLE_ASSERTS)
-    set(RH_ENABLE_ASSERTS TRUE CACHE INTERNAL "")
+    set(RH_ENABLE_ASSERTS TRUE CACHE INTERNAL "Enable runtime assertions")
+else ()
+    set(RH_ENABLE_ASSERTS FALSE CACHE INTERNAL "Enable runtime assertions")
 endif()
 
 # Platform detection
@@ -32,37 +47,78 @@ else()
 endif()
 
 # Helper function for per-target output directories
-# Supports both single-config (Makefiles/Ninja) and multi-config (VS/Xcode) generators
 function(set_target_output_dirs target_name)
     # Base directories for single-config generators
     set_target_properties(${target_name} PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/${target_name}
-        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/${target_name}
-        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/obj/${target_name}
+            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/
+            LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/
+            ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/
     )
     
     # Per-configuration directories for multi-config generators
     foreach(OUTPUTCONFIG Debug Release RelWithDebInfo MinSizeRel)
         string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG_UPPER)
         set_target_properties(${target_name} PROPERTIES
-            RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG_UPPER} 
-                ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}/bin/${target_name}
-            LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG_UPPER} 
-                ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}/lib/${target_name}
-            ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG_UPPER} 
-                ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}/obj/${target_name}
+                RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG_UPPER}
+                ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}/bin/
+                LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG_UPPER}
+                ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}/lib/
+                ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG_UPPER}
+                ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}/lib/
         )
     endforeach()
 endfunction()
 
+option(RH_ENABLE_CLANG_TIDY "Enable clang-tidy checks" ON)
+option(RH_ENABLE_CLANG_FORMAT "Enable clang-format target" ON)
+
+
+# Enforce naming conventions (configure-time validation)
+include(cmake/EnforceLayout.cmake)
+
+# Include code quality tools
+include(cmake/ClangFormat.cmake)
+include(cmake/ClangTidy.cmake)
+include(cmake/CodeQuality.cmake)
+
 # Add subdirectories (no project() calls in subdirectories)
-add_subdirectory(Rhodo)
-add_subdirectory(Application)
+add_subdirectory(engine)
+add_subdirectory(application)
 
 option(RH_BUILD_TESTS "Build unit tests" ON)
 
 if(RH_BUILD_TESTS)
     message("Building unit tests...")
     enable_testing()
-    add_subdirectory(Tests)
+    add_subdirectory(tests)
+endif ()
+
+# Finalize format and tidy targets (must be after all add_subdirectory calls)
+if (RH_ENABLE_CLANG_FORMAT)
+    finalize_format_targets()
+endif ()
+
+if (RH_ENABLE_CLANG_TIDY)
+    finalize_tidy_targets()
 endif()
+
+# Create combined fix target (nuclear button - runs tidy-fix + format)
+if (RH_ENABLE_CLANG_TIDY AND RH_ENABLE_CLANG_FORMAT)
+    add_custom_target(fix
+            DEPENDS tidy-fix format
+            COMMENT "Running full clang-tidy + clang-format pipeline"
+    )
+    message(STATUS "Created 'fix' target - runs tidy-fix and format in sequence")
+elseif (RH_ENABLE_CLANG_TIDY)
+    add_custom_target(fix
+            DEPENDS tidy-fix
+            COMMENT "Running clang-tidy fixes (format disabled)"
+    )
+elseif (RH_ENABLE_CLANG_FORMAT)
+    add_custom_target(fix
+            DEPENDS format
+            COMMENT "Running clang-format (tidy disabled)"
+    )
+endif ()
+
+include(cmake/Summary.cmake)

@@ -1,6 +1,6 @@
 ---
 FormatStyle: file
-HeaderFilterRegex: '^(?!.*(thirdparty|build)).*'
+HeaderFilterRegex: '^((?!.*(build|_deps|thirdparty|cmake-build|\.conan)).)*$'
 Checks: >
   -*,
   readability-identifier-naming,
