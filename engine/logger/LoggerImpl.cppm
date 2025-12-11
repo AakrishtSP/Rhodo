@@ -4,21 +4,21 @@ module;
 #include "quill/LogMacros.h"
 #include "quill/sinks/ConsoleSink.h"
 #include "quill/sinks/FileSink.h"
-#include "quill/std/Array.h"
-#include "quill/std/Chrono.h"
-#include "quill/std/Deque.h"
-#include "quill/std/FilesystemPath.h"
-#include "quill/std/ForwardList.h"
-#include "quill/std/List.h"
-#include "quill/std/Map.h"
-#include "quill/std/Optional.h"
-#include "quill/std/Pair.h"
-#include "quill/std/Set.h"
-#include "quill/std/Tuple.h"
-#include "quill/std/UnorderedMap.h"
-#include "quill/std/UnorderedSet.h"
-#include "quill/std/Vector.h"
-#include "quill/std/WideString.h"
+#include "quill/std/Array.h"           // NOLINT(misc-include-cleaner)
+#include "quill/std/Chrono.h"          // NOLINT(misc-include-cleaner)
+#include "quill/std/Deque.h"           // NOLINT(misc-include-cleaner)
+#include "quill/std/FilesystemPath.h"  // NOLINT(misc-include-cleaner)
+#include "quill/std/ForwardList.h"     // NOLINT(misc-include-cleaner)
+#include "quill/std/List.h"            // NOLINT(misc-include-cleaner)
+#include "quill/std/Map.h"             // NOLINT(misc-include-cleaner)
+#include "quill/std/Optional.h"        // NOLINT(misc-include-cleaner)
+#include "quill/std/Pair.h"            // NOLINT(misc-include-cleaner)
+#include "quill/std/Set.h"             // NOLINT(misc-include-cleaner)
+#include "quill/std/Tuple.h"           // NOLINT(misc-include-cleaner)
+#include "quill/std/UnorderedMap.h"    // NOLINT(misc-include-cleaner)
+#include "quill/std/UnorderedSet.h"    // NOLINT(misc-include-cleaner)
+#include "quill/std/Vector.h"          // NOLINT(misc-include-cleaner)
+#include "quill/std/WideString.h"      // NOLINT(misc-include-cleaner)
 
 export module Rhodo.Logger:Impl;
 import :Structures;
@@ -63,10 +63,10 @@ static auto ToQuillLevel(const LogLevel level) -> quill::LogLevel {
 class LoggerImpl {
  public:
   LoggerImpl() = delete;
-  LoggerImpl(const LoggerImpl&)                    = delete;
-  LoggerImpl(LoggerImpl&&)                         = delete;
+  LoggerImpl(const LoggerImpl&) = delete;
+  LoggerImpl(LoggerImpl&&) = delete;
   auto operator=(const LoggerImpl&) -> LoggerImpl& = delete;
-  auto operator=(LoggerImpl&&) -> LoggerImpl&      = delete;
+  auto operator=(LoggerImpl&&) -> LoggerImpl& = delete;
 
   ~LoggerImpl() = default;
 
@@ -89,22 +89,27 @@ LoggerImpl::LoggerImpl(const LoggerConfig& config) {
 
   for (const auto& [type, identifier] : config.sinks) {
     if (type == SinkType::Console) {
-      sinks.push_back(quill::Frontend::create_or_get_sink<quill::ConsoleSink>(identifier));
+      sinks.push_back(
+          quill::Frontend::create_or_get_sink<quill::ConsoleSink>(identifier));
     } else if (type == SinkType::File) {
-      sinks.push_back(quill::Frontend::create_or_get_sink<quill::FileSink>(identifier));
+      sinks.push_back(
+          quill::Frontend::create_or_get_sink<quill::FileSink>(identifier));
     }
   }
 
-  const quill::PatternFormatterOptions kFormat{config.message_pattern, config.time_format,
-                                               quill::Timezone::GmtTime};
+  const quill::PatternFormatterOptions kFormat{
+      config.message_pattern, config.time_format, quill::Timezone::GmtTime};
 
-  logger_ = quill::Frontend::create_or_get_logger(config.name, std::move(sinks), kFormat);
+  logger_ = quill::Frontend::create_or_get_logger(config.name, std::move(sinks),
+                                                  kFormat);
   logger_->set_log_level(ToQuillLevel(config.default_level));
 }
 
-auto LoggerImpl::Log(const LogLevel k_level, const char* fmt, auto&&... args) -> void {
+auto LoggerImpl::Log(const LogLevel k_level, const char* fmt, auto&&... args)
+    -> void {
   if (logger_ != nullptr) [[likely]] {
-    QUILL_LOG_DYNAMIC(logger_, ToQuillLevel(k_level), fmt, std::forward<decltype(args)>(args)...);
+    QUILL_LOG_DYNAMIC(logger_, ToQuillLevel(k_level), fmt,
+                      std::forward<decltype(args)>(args)...);
   }
 }
 
@@ -119,4 +124,4 @@ auto LoggerImpl::Flush() const -> void {
     logger_->flush_log();
   }
 }
-}   // namespace rhodo::logger::impl
+}  // namespace rhodo::logger::impl

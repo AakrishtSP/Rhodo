@@ -25,9 +25,6 @@ target_link_libraries(Application
 # Set output directories
 set_target_output_dirs(Application)
 
-# Register application-specific clang-tidy config (safety-first Google style)
-register_tidy_config(Application ${CMAKE_CURRENT_SOURCE_DIR})
-
 # Register for code quality tools
 register_code_quality(Application)
 

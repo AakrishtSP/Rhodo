@@ -40,7 +40,4 @@ target_compile_definitions(Rhodo
 # Set output directories
 set_target_output_dirs(Rhodo)
 
-# Register engine-specific clang-tidy config (performance-first LLVM style)
-register_tidy_config(Rhodo ${CMAKE_CURRENT_SOURCE_DIR})
-
 register_code_quality(Rhodo)

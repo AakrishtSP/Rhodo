@@ -5,6 +5,35 @@
 set_property(GLOBAL PROPERTY RH_ALL_TIDY_SOURCES "")
 set_property(GLOBAL PROPERTY RH_TIDY_TARGETS "")
 
+# Helper to gather every project source so analysis is not limited to
+# per-target registration. This pulls from the main source roots and avoids
+# build/thirdparty trees.
+function(rh_collect_project_sources out_var)
+    set(CANDIDATE_DIRS
+            "${CMAKE_SOURCE_DIR}/application"
+            "${CMAKE_SOURCE_DIR}/engine"
+            "${CMAKE_SOURCE_DIR}/tests"
+    )
+
+    set(ALL_SOURCES "")
+    foreach (DIR_PATH ${CANDIDATE_DIRS})
+        if (EXISTS "${DIR_PATH}")
+            file(GLOB_RECURSE DIR_SOURCES
+                    CONFIGURE_DEPENDS
+                    "${DIR_PATH}/*.cpp"
+                    "${DIR_PATH}/*.cppm"
+                    "${DIR_PATH}/*.ixx"
+                    "${DIR_PATH}/*.cxx"
+                    "${DIR_PATH}/*.cc"
+            )
+            list(APPEND ALL_SOURCES ${DIR_SOURCES})
+        endif ()
+    endforeach ()
+
+    list(REMOVE_DUPLICATES ALL_SOURCES)
+    set(${out_var} "${ALL_SOURCES}" PARENT_SCOPE)
+endfunction()
+
 # Always define functions, but only execute tidy logic if enabled
 set(RH_CLANG_TIDY_AVAILABLE OFF)
 
@@ -40,10 +69,11 @@ if (RH_ENABLE_CLANG_TIDY)
         # Limit analysis to project sources (skip build/_deps/thirdparty noise)
         set(CLANG_TIDY_HEADER_FILTER "${CMAKE_SOURCE_DIR}/(application|engine|tests)/.*")
 
-        # Configure clang-tidy command (will be overridden per-target)
+        # Configure clang-tidy command (will be overridden per-target). Do not
+        # pin a single config file so the tool can pick up the nearest
+        # .clang-tidy (root or engine) automatically.
         set(CMAKE_CXX_CLANG_TIDY
                 "${CLANG_TIDY_EXE}"
-                "--config-file=${CMAKE_SOURCE_DIR}/.clang-tidy"
                 "--header-filter=${CLANG_TIDY_HEADER_FILTER}"
         )
 
@@ -119,8 +149,13 @@ function(enable_clang_tidy_for_target target_name)
     # Get the appropriate config file for this target
     get_tidy_config_for_target(${target_name} TIDY_CONFIG)
 
+    set(TIDY_ARGS "--header-filter=${CLANG_TIDY_HEADER_FILTER}")
+    if (EXISTS "${TIDY_CONFIG}")
+        list(APPEND TIDY_ARGS "--config-file=${TIDY_CONFIG}")
+    endif ()
+
     set_target_properties(${target_name} PROPERTIES
-            CXX_CLANG_TIDY "${CLANG_TIDY_EXE};--config-file=${TIDY_CONFIG};--header-filter=${CLANG_TIDY_HEADER_FILTER}"
+            CXX_CLANG_TIDY "${CLANG_TIDY_EXE};${TIDY_ARGS}"
     )
 
     # Use shared source collection from CodeQuality.cmake
@@ -172,8 +207,14 @@ endfunction()
 
 # Function to create manual tidy targets after all targets are registered
 function(finalize_tidy_targets)
+    # Gather registered sources (per-target) and global project sources to
+    # ensure the entire tree is covered.
     get_property(ALL_SOURCES GLOBAL PROPERTY RH_ALL_TIDY_SOURCES)
     get_property(ALL_TARGETS GLOBAL PROPERTY RH_TIDY_TARGETS)
+
+    rh_collect_project_sources(PROJECT_WIDE_SOURCES)
+    list(APPEND ALL_SOURCES ${PROJECT_WIDE_SOURCES})
+    list(REMOVE_DUPLICATES ALL_SOURCES)
 
     if (NOT ALL_SOURCES)
         message(WARNING "No sources registered for clang-tidy!")
@@ -197,7 +238,6 @@ function(finalize_tidy_targets)
     else ()
         add_custom_target(tidy
                 COMMAND ${CLANG_TIDY_EXE}
-                --config-file=${CMAKE_SOURCE_DIR}/.clang-tidy
                 -p ${CMAKE_BINARY_DIR}
                 ${ALL_SOURCES}
                 COMMENT "Running clang-tidy on ${NUM_FILES} files from ${NUM_TARGETS} targets..."
@@ -221,7 +261,6 @@ function(finalize_tidy_targets)
     else ()
         add_custom_target(tidy-fix
                 COMMAND ${CLANG_TIDY_EXE}
-                --config-file=${CMAKE_SOURCE_DIR}/.clang-tidy
                 -p ${CMAKE_BINARY_DIR}
                 --fix
                 ${ALL_SOURCES}
@@ -270,12 +309,16 @@ function(add_tidy_target target_name)
     # Create per-target tidy target
     get_tidy_config_for_target(${target_name} TIDY_CONFIG)
 
+    set(TIDY_ARGS "-p" "${CMAKE_BINARY_DIR}")
+    if (EXISTS "${TIDY_CONFIG}")
+        list(APPEND TIDY_ARGS "--config-file=${TIDY_CONFIG}")
+    endif ()
+
     add_custom_target(tidy-${target_name}
             COMMAND ${CLANG_TIDY_EXE}
-            --config-file=${TIDY_CONFIG}
-            -p ${CMAKE_BINARY_DIR}
+            ${TIDY_ARGS}
             ${CPP_SOURCES}
-            COMMENT "Running clang-tidy on target: ${target_name} (config: ${TIDY_CONFIG})"
+            COMMENT "Running clang-tidy on target: ${target_name}"
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
             VERBATIM
     )
@@ -336,10 +379,14 @@ function(add_tidy_group group_name)
         list(GET GROUP_CONFIGS 0 GROUP_CONFIG)
     endif ()
 
+    set(TIDY_ARGS "-p" "${CMAKE_BINARY_DIR}")
+    if (EXISTS "${GROUP_CONFIG}")
+        list(APPEND TIDY_ARGS "--config-file=${GROUP_CONFIG}")
+    endif ()
+
     add_custom_target(tidy-${group_name}
             COMMAND ${CLANG_TIDY_EXE}
-            --config-file=${GROUP_CONFIG}
-            -p ${CMAKE_BINARY_DIR}
+            ${TIDY_ARGS}
             ${GROUP_SOURCES}
             COMMENT "Running clang-tidy on group: ${group_name}"
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}

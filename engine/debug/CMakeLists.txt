@@ -13,7 +13,4 @@ target_link_libraries(RhodoDebug
 
 target_include_directories(RhodoDebug PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-# Register engine-specific clang-tidy config (performance-first LLVM style)
-register_tidy_config(RhodoDebug ${CMAKE_SOURCE_DIR}/engine)
-
 register_code_quality(RhodoDebug)

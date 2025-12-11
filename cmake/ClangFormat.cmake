@@ -29,6 +29,37 @@ message(STATUS "clang-format version: ${CLANG_FORMAT_VERSION}")
 set_property(GLOBAL PROPERTY RH_ALL_FORMAT_SOURCES "")
 set_property(GLOBAL PROPERTY RH_FORMAT_TARGETS "")
 
+# Helper to gather every project source so formatting is not limited to
+# per-target registration. This pulls from the main source roots and avoids
+# build/thirdparty trees.
+function(rh_collect_project_sources out_var)
+    set(CANDIDATE_DIRS
+            "${CMAKE_SOURCE_DIR}/application"
+            "${CMAKE_SOURCE_DIR}/engine"
+            "${CMAKE_SOURCE_DIR}/tests"
+    )
+
+    set(ALL_SOURCES "")
+    foreach (DIR_PATH ${CANDIDATE_DIRS})
+        if (EXISTS "${DIR_PATH}")
+            file(GLOB_RECURSE DIR_SOURCES
+                    CONFIGURE_DEPENDS
+                    "${DIR_PATH}/*.cpp"
+                    "${DIR_PATH}/*.cppm"
+                    "${DIR_PATH}/*.ixx"
+                    "${DIR_PATH}/*.cxx"
+                    "${DIR_PATH}/*.cc"
+                    "${DIR_PATH}/*.hpp"
+                    "${DIR_PATH}/*.h"
+            )
+            list(APPEND ALL_SOURCES ${DIR_SOURCES})
+        endif ()
+    endforeach ()
+
+    list(REMOVE_DUPLICATES ALL_SOURCES)
+    set(${out_var} "${ALL_SOURCES}" PARENT_SCOPE)
+endfunction()
+
 
 # Function to register a target for formatting
 function(add_format_target target_name)
@@ -69,8 +100,14 @@ function(add_format_target target_name)
 endfunction()
 
 function(finalize_format_targets)
+    # Gather registered sources (per-target) and global project sources to
+    # ensure the entire tree is covered.
     get_property(ALL_SOURCES GLOBAL PROPERTY RH_ALL_FORMAT_SOURCES)
     get_property(ALL_TARGETS GLOBAL PROPERTY RH_FORMAT_TARGETS)
+
+    rh_collect_project_sources(PROJECT_WIDE_SOURCES)
+    list(APPEND ALL_SOURCES ${PROJECT_WIDE_SOURCES})
+    list(REMOVE_DUPLICATES ALL_SOURCES)
 
     if (NOT ALL_SOURCES)
         message(WARNING "No sources registered for formatting!")
