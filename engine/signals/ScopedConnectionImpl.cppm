@@ -1,18 +1,8 @@
-module;
-#include <algorithm>
-#include <memory>
-#include <mutex>
-#include <shared_mutex>
-#include <string>
-#include <typeindex>
-#include <unordered_map>
-
 export module Rhodo.Signals:ScopedConnectionImpl;
 
 import :ScopedConnection;
 
-using namespace rhodo;
-
+namespace rhodo {
 template <typename... Args>
 ScopedConnection<Args...>::ScopedConnection() noexcept = default;
 
@@ -64,3 +54,4 @@ template <typename... Args>
 ScopedConnection<Args...>::operator bool() const noexcept {
   return Connected();
 }
+}  // namespace rhodo

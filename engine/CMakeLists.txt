@@ -2,6 +2,7 @@ add_subdirectory(logger)
 add_subdirectory(signals)
 add_subdirectory(debug)
 add_subdirectory(core)
+add_subdirectory(memory)
 
 
 # Create static library
@@ -20,6 +21,7 @@ target_link_libraries(Rhodo
         RhodoSignals
         RhodoDebug
         RhodoCore
+        RhodoMemory
 )
 
 # Build configuration defines (works with both single-config and multi-config generators)

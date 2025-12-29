@@ -25,11 +25,13 @@ Checks: >
   -readability-magic-numbers,
   -cppcoreguidelines-avoid-magic-numbers,
   -cppcoreguidelines-avoid-non-const-global-variables,
+  -cppcoreguidelines-pro-bounds-constant-array-index,
   -misc-use-anonymous-namespace,
-  -llvm-prefer-static-over-anonymous-namespace
+  -llvm-prefer-static-over-anonymous-namespace,
   -llvm-header-guard,
-  -portability-avoid-pragma-once
-  -readability-redundant-declaration
+  -portability-avoid-pragma-once,
+  -readability-redundant-declaration,
+  -readability-identifier-length,
 
 WarningsAsErrors: >
   bugprone-*,
@@ -44,9 +46,7 @@ WarningsAsErrors: >
   misc-*,
   portability-*,
   mpi-*,
-  openmp-*
-  -readability-redundant-declaration
-
+  openmp-*,
 CheckOptions:
   # General toggles
   - { key: misc-no-recursion, value: false }

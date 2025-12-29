@@ -38,7 +38,7 @@ inline auto CleanupEmpty() -> void {
 }
 
 template <typename... Args>
-[[nodiscard]] auto MakeScopedConnection(Signal<Args...>&             signal,
+[[nodiscard]] auto MakeScopedConnection(Signal<Args...>& signal,
                                         std::function<void(Args...)> callback)
     -> ScopedConnection<Args...> {
   auto signal_id = signal.Connect(std::move(callback));
@@ -46,9 +46,10 @@ template <typename... Args>
 }
 
 template <typename... Args, typename T>
-[[nodiscard]] auto MakeScopedConnection(Signal<Args...>& signal, T& obj, void (T::*method)(Args...))
+[[nodiscard]] auto MakeScopedConnection(Signal<Args...>& signal, T& obj,
+                                        void (T::*method)(Args...))
     -> ScopedConnection<Args...> {
   auto signal_id = signal.Connect(obj, method);
   return ScopedConnection<Args...>(signal, signal_id);
 }
-}   // namespace rhodo::signals
+}  // namespace rhodo::signals

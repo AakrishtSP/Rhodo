@@ -10,8 +10,7 @@ module;
 export module Rhodo.Signals:SignalHubImpl;
 import :SignalHub;
 
-using namespace rhodo;
-
+namespace rhodo {
 template <typename... Args>
 auto SignalHub::Get(const std::string& name) -> Signal<Args...>& {
   const SignalKey kKey{.name = name,
@@ -89,7 +88,8 @@ auto WyMix(uint64_t a, const uint64_t b)  // NOLINT(*-identifier-length)
   return a;
 }
 
-auto Combine(const uint64_t h1, const uint64_t h2)  // NOLINT(*-identifier-length)
+auto Combine(const uint64_t h1,  // NOLINT(*-identifier-length)
+             const uint64_t h2)  // NOLINT(*-identifier-length)
     -> uint64_t {
   return WyMix(h1, h2);
 }
@@ -104,3 +104,4 @@ template <typename... Args>
 auto SignalHub::SignalHolder<Args...>::IsEmpty() const noexcept -> bool {
   return signal.empty();
 }
+}  // namespace rhodo

@@ -28,7 +28,7 @@ class SignalHub {
 
  private:
   struct SignalKey {
-    std::string     name;
+    std::string name;
     std::type_index type;
 
     auto operator==(const SignalKey& other) const noexcept -> bool;
@@ -40,9 +40,9 @@ class SignalHub {
 
   struct ISignalHolder {
     virtual ~ISignalHolder() = default;
-    ISignalHolder(const ISignalHolder&)            = delete;
+    ISignalHolder(const ISignalHolder&) = delete;
     auto operator=(const ISignalHolder&) -> ISignalHolder& = delete;
-    ISignalHolder(ISignalHolder&&)                 = delete;
+    ISignalHolder(ISignalHolder&&) = delete;
     auto operator=(ISignalHolder&&) -> ISignalHolder& = delete;
 
     [[nodiscard]] virtual auto IsEmpty() const noexcept -> bool = 0;
@@ -55,8 +55,9 @@ class SignalHub {
     [[nodiscard]] auto IsEmpty() const noexcept -> bool override;
   };
 
-  std::unordered_map<SignalKey, std::unique_ptr<ISignalHolder>, SignalKeyHash> signals_;
-  mutable std::shared_mutex                                                    mutex_;
+  std::unordered_map<SignalKey, std::unique_ptr<ISignalHolder>, SignalKeyHash>
+      signals_;
+  mutable std::shared_mutex mutex_;
 };
 
-}   // namespace rhodo
+}  // namespace rhodo

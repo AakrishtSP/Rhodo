@@ -1,5 +1,5 @@
 module;
-#include <bits/move.h>
+
 export module Rhodo.Logger;
 
 export import :Structures;
@@ -11,31 +11,72 @@ template <typename Tag>
 class Logger {
  public:
   Logger() = default;
+  template <LogLevel Level, typename... Args>
+  static auto Log(const char* fmt, Args&... args) -> void {
+    GetInstance().Log(Level, fmt, args...);
+  }
 
-#define RHODO_LOG_LEVEL(name)                                            \
-  template <typename... Args>                                            \
-  static auto name(const char* fmt, Args&&... args) -> void {            \
-    getInstance().Log(LogLevel::name, fmt, std::forward<Args>(args)...); \
+  template <typename... Args>
+  static auto TraceL1(const char* fmt, Args&... args) -> void {
+    Log<LogLevel::TraceL1>(fmt, args...);
   }
-  RHODO_LOG_LEVEL(TraceL1)
-  RHODO_LOG_LEVEL(TraceL2)
-  RHODO_LOG_LEVEL(TraceL3)
+
+  template <typename... Args>
+  static auto TraceL2(const char* fmt, Args&... args) -> void {
+    Log<LogLevel::TraceL2>(fmt, args...);
+  }
+
+  template <typename... Args>
+  static auto TraceL3(const char* fmt, Args&... args) -> void {
+    Log<LogLevel::TraceL3>(fmt, args...);
+  }
+
   static auto Trace(const char* fmt, auto&&... args) -> void {
-    getInstance().Log(LogLevel::TraceL1, fmt, std::forward<decltype(args)>(args)...);
+    TraceL1(fmt, args...);
   }
-  RHODO_LOG_LEVEL(Debug)
-  RHODO_LOG_LEVEL(Info)
-  RHODO_LOG_LEVEL(Notice)
-  RHODO_LOG_LEVEL(Warning)
-  RHODO_LOG_LEVEL(Error)
-  RHODO_LOG_LEVEL(Critical)
-  RHODO_LOG_LEVEL(Backtrace)
-#undef RHODO_LOG_LEVEL
-  static auto SetLevel(const LogLevel kLevel) -> void { getInstance().SetLevel(kLevel); }
-  static auto Flush() -> void { getInstance().Flush(); }
+
+  template <typename... Args>
+  static auto Debug(const char* fmt, Args&... args) -> void {
+    Log<LogLevel::Debug>(fmt, args...);
+  }
+
+  template <typename... Args>
+  static auto Info(const char* fmt, Args&... args) -> void {
+    Log<LogLevel::Info>(fmt, args...);
+  }
+
+  template <typename... Args>
+  static auto Notice(const char* fmt, Args&... args) -> void {
+    Log<LogLevel::Notice>(fmt, args...);
+  }
+
+  template <typename... Args>
+  static auto Warning(const char* fmt, Args&... args) -> void {
+    Log<LogLevel::Warning>(fmt, args...);
+  }
+
+  template <typename... Args>
+  static auto Error(const char* fmt, Args&... args) -> void {
+    Log<LogLevel::Error>(fmt, args...);
+  }
+
+  template <typename... Args>
+  static auto Critical(const char* fmt, Args&... args) -> void {
+    Log<LogLevel::Critical>(fmt, args...);
+  }
+
+  template <typename... Args>
+  static auto Backtrace(const char* fmt, Args&... args) -> void {
+    Log<LogLevel::Backtrace>(fmt, args...);
+  }
+
+  static auto SetLevel(const LogLevel level) -> void {
+    GetInstance().SetLevel(level);
+  }
+  static auto Flush() -> void { GetInstance().Flush(); }
 
  private:
-  static auto getInstance() -> impl::LoggerImpl& {
+  static auto GetInstance() -> impl::LoggerImpl& {
     static impl::LoggerImpl instance{Tag::Config()};
     return instance;
   }

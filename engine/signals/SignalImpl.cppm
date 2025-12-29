@@ -53,8 +53,8 @@ auto Signal<Args...>::Disconnect(SlotId slot_id) -> void {
               disconnect_count_.fetch_add(1, std::memory_order_relaxed) + 1;
           kCount >= kCleanupThreshold) {
         needs_cleanup_.store(true, std::memory_order_release);
-          } else {
-          }
+      } else {
+      }
       return;
     }
   }
@@ -175,4 +175,4 @@ auto Signal<Args...>::CleanupInternal() noexcept -> void {
   needs_cleanup_.store(false, std::memory_order_release);
   disconnect_count_.store(0, std::memory_order_relaxed);
 }
-} // namespace rhodo
+}  // namespace rhodo
