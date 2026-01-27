@@ -1,10 +1,8 @@
 module;
-#include <algorithm>
 #include <atomic>
 #include <cstdint>
 #include <deque>
 #include <functional>
-#include <mutex>
 #include <shared_mutex>
 
 export module Rhodo.Signals:Signal;

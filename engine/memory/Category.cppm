@@ -1,11 +1,13 @@
+module;
+#include <array>
+#include <cstdint>
+#include <string_view>
+
 export module Rhodo.Memory:Categories;
 
-import <array>;
-import <cstdint>;
-import <string_view>;
 
 namespace rhodo::memory {
-
+// NOLINTBEGIN(*-macro-usage)
 #define RHODO_MEMORY_CATEGORIES(X) \
   X(Generic)                       \
   X(Renderer)                      \
@@ -18,22 +20,24 @@ namespace rhodo::memory {
   X(Animation)                     \
   X(Navigation)                    \
   X(Networking)
+// NOLINTEND(*-macro-usage)
 
-// ============================================================================
-// Category Enum
-// ============================================================================
 export enum class MemoryCategory : uint8_t {
+  //NOLINTBEGIN(*-macro-usage)
 #define X(name) name,
   RHODO_MEMORY_CATEGORIES(X)
 #undef X
+  //NOLINTEND(*-macro-usage)
   Count
 };
 
 namespace detail {
 constexpr std::array kCategoryNames = {
+  //NOLINTBEGIN(*-macro-usage)
 #define X(name) std::string_view{#name},
     RHODO_MEMORY_CATEGORIES(X)
 #undef X
+  //NOLINTEND(*-macro-usage)
 };
 
 static_assert(kCategoryNames.size() ==

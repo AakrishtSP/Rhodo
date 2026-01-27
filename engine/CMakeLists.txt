@@ -4,6 +4,13 @@ add_subdirectory(debug)
 add_subdirectory(core)
 add_subdirectory(memory)
 
+# Define the option
+option(RH_ENABLE_INSTRUMENTATION "Enable runtime instrumentation" ON)
+
+if(RH_ENABLE_INSTRUMENTATION)
+    add_subdirectory(instrumentation)
+    add_compile_definitions(RH_ENABLE_INSTRUMENTATION)
+endif()
 
 # Create static library
 add_library(Rhodo STATIC)
@@ -23,6 +30,11 @@ target_link_libraries(Rhodo
         RhodoCore
         RhodoMemory
 )
+
+# Conditionally link instrumentation
+if(RH_ENABLE_INSTRUMENTATION)
+    target_link_libraries(Rhodo PUBLIC RhodoInstrumentation)
+endif()
 
 # Build configuration defines (works with both single-config and multi-config generators)
 target_compile_definitions(Rhodo

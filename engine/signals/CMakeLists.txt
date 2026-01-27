@@ -10,6 +10,7 @@ target_sources(RhodoSignals
         ScopedConnection.cppm
         SignalHub.cppm
         Signals.cppm
+        Hooks.cppm
         PRIVATE
         FILE_SET cxx_module_private TYPE CXX_MODULES BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} FILES
         SignalImpl.cppm
@@ -20,6 +21,8 @@ target_sources(RhodoSignals
 # Include directory
 target_include_directories(RhodoSignals PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_link_libraries(RhodoSignals PUBLIC RhodoDebug)
+target_link_libraries(RhodoSignals PUBLIC
+        RhodoLogger
+)
 
 register_code_quality(RhodoSignals)

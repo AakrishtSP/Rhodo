@@ -1,43 +1,41 @@
 module;
-#include <chrono>
 #include <source_location>
+#include <string_view>
 
 export module Rhodo.Debug:Profiling;
 
-import :Config;
-import Rhodo.Logger;
-
 export namespace rhodo::debug {
-class ScopedTimer {
- public:
-  explicit ScopedTimer(const char* name,
-                       const std::source_location& loc =
-                           std::source_location::current()) noexcept
-      : name_(name),
-        loc_(loc),
-        start_(std::chrono::high_resolution_clock::now()) {}
 
-  ~ScopedTimer() noexcept {
-    if constexpr (kIsDebug) {
-      auto end = std::chrono::high_resolution_clock::now();
-      auto duration =
-          std::chrono::duration_cast<std::chrono::microseconds>(end - start_);
+    using ProfileBeginFn = void(*)(std::string_view name, const std::source_location& loc);
+    using ProfileEndFn = void(*)();
 
-      logger::CoreLogger::Debug("[TIMER] {}: {} μs (at {}:{})", name_,
-                                duration.count(), loc_.file_name(),
-                                loc_.line());
+    inline ProfileBeginFn g_profile_begin = nullptr;
+    inline ProfileEndFn g_profile_end = nullptr;
+
+    inline void SetProfilerHooks(ProfileBeginFn begin, ProfileEndFn end) {
+        g_profile_begin = begin;
+        g_profile_end = end;
     }
-  }
 
-  ScopedTimer(const ScopedTimer&) = delete;
-  auto operator=(const ScopedTimer&) -> ScopedTimer& = delete;
-  ScopedTimer(ScopedTimer&&) noexcept = default;
-  auto operator=(ScopedTimer&&) noexcept -> ScopedTimer& = default;
+    class ScopedProfile {
+    public:
+        explicit ScopedProfile(std::string_view name = "", 
+                               const std::source_location& loc = std::source_location::current()) {
+            if (g_profile_begin) {
+                // If name is empty, use function name from location
+                std::string_view final_name = name.empty() ? loc.function_name() : name;
+                g_profile_begin(final_name, loc);
+            }
+        }
 
- private:
-  const char* name_;
-  std::source_location loc_;
-  std::chrono::high_resolution_clock::time_point start_;
-};
+        ~ScopedProfile() {
+            if (g_profile_end) {
+                g_profile_end();
+            }
+        }
 
-}  // namespace rhodo::debug
+        ScopedProfile(const ScopedProfile&) = delete;
+        ScopedProfile& operator=(const ScopedProfile&) = delete;
+    };
+
+}

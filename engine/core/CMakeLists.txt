@@ -2,6 +2,10 @@ add_library(RhodoCore STATIC)
 
 target_sources(RhodoCore
         PUBLIC
+        FILE_SET CXX_MODULES BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} FILES
+        Core.cppm
+        Asserts.cppm
+        PUBLIC
         Core.hpp
         PRIVATE
         EntryPoint.cpp

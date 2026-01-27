@@ -5,7 +5,7 @@ module;
 
 export module Rhodo.Logger:Structures;
 
-namespace rhodo::logger {
+export namespace rhodo::logger {
 enum class LogLevel : std::uint8_t {
   TraceL3,
   TraceL2,

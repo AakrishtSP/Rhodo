@@ -8,6 +8,7 @@ module;
 export module Rhodo.Signals:SignalImpl;
 
 import :Signal;
+import :Hooks;
 
 namespace rhodo {
 template <typename... Args>
@@ -74,6 +75,7 @@ auto Signal<Args...>::DisconnectAll() noexcept -> void {
 template <typename... Args>
 template <typename... A>
 auto Signal<Args...>::Emit(A&&... args) -> void {
+  signals::NotifyEmitBegin("Signal::Emit");
   {
     std::shared_lock lock(mutex_);
 
@@ -88,6 +90,7 @@ auto Signal<Args...>::Emit(A&&... args) -> void {
       }
     }
   }
+  signals::NotifyEmitEnd();
 
   // After releasing the shared lock, check if cleanup is needed
   // Only one thread will successfully perform cleanup due to the atomic
@@ -104,6 +107,7 @@ auto Signal<Args...>::Emit(A&&... args) -> void {
 template <typename... Args>
 template <typename... A>
 auto Signal<Args...>::BlockingEmit(A&&... args) -> void {
+  signals::NotifyEmitBegin("Signal::BlockingEmit");
   std::unique_lock lock(mutex_);
 
   for (const auto& slot : slots_) {
@@ -114,6 +118,7 @@ auto Signal<Args...>::BlockingEmit(A&&... args) -> void {
       }
     }
   }
+  signals::NotifyEmitEnd();
 
   // Perform cleanup if needed
   if (needs_cleanup_.exchange(false, std::memory_order_acq_rel)) {

@@ -8,6 +8,7 @@ export module Rhodo.Signals;
 export import :Signal;
 export import :SignalHub;
 export import :ScopedConnection;
+export import :Hooks;
 export namespace rhodo::signals {
 constexpr auto Global() noexcept -> SignalHub& {
   static SignalHub hub;

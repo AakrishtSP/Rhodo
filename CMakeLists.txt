@@ -14,6 +14,15 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Export compile commands for IDE and tools
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+option(RH_ENABLE_DEBUG "Enable debug utilities" ON)
+if(RH_ENABLE_DEBUG)
+    message("Debug utilities enabled")
+    add_compile_definitions(RH_ENABLE_DEBUG)
+endif ()
+
+option(RH_ENABLE_CLANG_TIDY "Enable clang-tidy checks" ON)
+option(RH_ENABLE_CLANG_FORMAT "Enable clang-format target" ON)
+
 # Add custom module paths
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/thirdparty/")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
@@ -25,15 +34,6 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
-
-# Enable assertions for Debug and RelWithDebInfo builds
-if (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-    message(STATUS "Enabling Rhodo assertions for ${CMAKE_BUILD_TYPE} build")
-    add_compile_definitions(RH_ENABLE_ASSERTS)
-    set(RH_ENABLE_ASSERTS TRUE CACHE INTERNAL "Enable runtime assertions")
-else ()
-    set(RH_ENABLE_ASSERTS FALSE CACHE INTERNAL "Enable runtime assertions")
-endif()
 
 # Platform detection
 if(WIN32)
@@ -54,27 +54,20 @@ function(set_target_output_dirs target_name)
             LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/
             ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/
     )
-    
+
     # Per-configuration directories for multi-config generators
-    foreach(OUTPUTCONFIG Debug Release RelWithDebInfo MinSizeRel)
-        string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG_UPPER)
+    foreach(OUTPUT_CONFIG Debug Release RelWithDebInfo MinSizeRel)
+        string(TOUPPER ${OUTPUT_CONFIG} OUTPUT_CONFIG_UPPER)
         set_target_properties(${target_name} PROPERTIES
-                RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG_UPPER}
-                ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}/bin/
-                LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG_UPPER}
-                ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}/lib/
-                ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG_UPPER}
-                ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}/lib/
+                RUNTIME_OUTPUT_DIRECTORY_${OUTPUT_CONFIG_UPPER}
+                ${CMAKE_BINARY_DIR}/${OUTPUT_CONFIG}/bin/
+                LIBRARY_OUTPUT_DIRECTORY_${OUTPUT_CONFIG_UPPER}
+                ${CMAKE_BINARY_DIR}/${OUTPUT_CONFIG}/lib/
+                ARCHIVE_OUTPUT_DIRECTORY_${OUTPUT_CONFIG_UPPER}
+                ${CMAKE_BINARY_DIR}/${OUTPUT_CONFIG}/lib/
         )
     endforeach()
 endfunction()
-
-option(RH_ENABLE_CLANG_TIDY "Enable clang-tidy checks" ON)
-option(RH_ENABLE_CLANG_FORMAT "Enable clang-format target" ON)
-
-
-# Enforce naming conventions (configure-time validation)
-include(cmake/EnforceLayout.cmake)
 
 # Include code quality tools
 include(cmake/ClangFormat.cmake)
@@ -84,23 +77,6 @@ include(cmake/CodeQuality.cmake)
 # Add subdirectories (no project() calls in subdirectories)
 add_subdirectory(engine)
 add_subdirectory(application)
-
-option(RH_BUILD_TESTS "Build unit tests" ON)
-
-if(RH_BUILD_TESTS)
-    message("Building unit tests...")
-    enable_testing()
-    add_subdirectory(tests)
-endif ()
-
-# Finalize format and tidy targets (must be after all add_subdirectory calls)
-if (RH_ENABLE_CLANG_FORMAT)
-    finalize_format_targets()
-endif ()
-
-if (RH_ENABLE_CLANG_TIDY)
-    finalize_tidy_targets()
-endif()
 
 # Create combined fix target (nuclear button - runs tidy-fix + format)
 if (RH_ENABLE_CLANG_TIDY AND RH_ENABLE_CLANG_FORMAT)

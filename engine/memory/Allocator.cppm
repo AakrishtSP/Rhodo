@@ -1,12 +1,14 @@
+module;
+#include  <cassert>
+#include  <cstddef>
+#include  <cstdint>
+#include  <cstdlib>
+#include  <source_location>
+
 export module Rhodo.Memory:Allocator;
 
 import :Categories;
 import :Hooks;
-import <cstdlib>;
-import <cstdint>;
-import <cassert>;
-import <source_location>;
-import <bit>;
 
 export namespace rhodo::memory {
 
@@ -69,11 +71,14 @@ inline auto CheckGuard(void* /*ptr*/, const char* /*location*/) noexcept
 }  // namespace detail
 #endif
 
-// Core Allocation Function
-inline auto Allocate(const size_t size, const size_t alignment,
-                     const MemoryCategory category = MemoryCategory::Generic,
-                     const std::source_location& loc =
-                         std::source_location::current()) noexcept -> void* {
+// -----------------------------------------------------------------------------
+// INTERNAL / CORE API (No Instrumentation)
+// -----------------------------------------------------------------------------
+
+namespace internal {
+
+inline auto AllocateCore(const size_t size, const size_t alignment,
+                         const MemoryCategory category) noexcept -> void* {
   // Validate alignment is power of 2
   assert(std::has_single_bit(alignment) && "Alignment must be power of 2");
 
@@ -136,14 +141,10 @@ inline auto Allocate(const size_t size, const size_t alignment,
   auto* user_ptr = reinterpret_cast<void*>(kAlignedUserAddr);
   // NOLINTEND(*-pro-type-reinterpret-cast, *-no-int-to-ptr)
 
-  // Notify observers (hook may be null - that's fine)
-  NotifyAllocation(user_ptr, size, category, loc);
-
   return user_ptr;
 }
 
-// Core Deallocation Function
-inline auto Deallocate(void* user_ptr) noexcept -> void {
+inline auto DeallocateCore(void* user_ptr) noexcept -> void {
   if (user_ptr == nullptr) {
     return;
   }
@@ -177,14 +178,49 @@ inline auto Deallocate(void* user_ptr) noexcept -> void {
   void* raw_ptr = reinterpret_cast<char*>(header) - header->offset;
   // NOLINTEND(*-pro-type-reinterpret-cast, *-pro-bounds-pointer-arithmetic)
 
-  // Notify observers BEFORE freeing
-  NotifyDeallocation(user_ptr, header->size, header->category);
-
-  // Mark as freed (helps catch double-free)
   header->MarkFreed();
-
-  // Free original allocation
   std::free(raw_ptr);  // NOLINT(*-owning-memory, *-no-malloc)
+}
+
+}  // namespace internal
+
+// -----------------------------------------------------------------------------
+// PUBLIC API (With Instrumentation)
+// -----------------------------------------------------------------------------
+
+// Core Allocation Function
+inline auto Allocate(const size_t size, const size_t alignment,
+                     const MemoryCategory category = MemoryCategory::Generic,
+                     const std::source_location& loc =
+                         std::source_location::current()) noexcept -> void* {
+  // 1. Perform the actual allocation
+  void* ptr = internal::AllocateCore(size, alignment, category);
+
+  // 2. Instrument it (if successful)
+  if (ptr != nullptr) {
+    NotifyAllocation(ptr, size, category, loc);
+  }
+
+  return ptr;
+}
+
+// Core Deallocation Function
+inline auto Deallocate(void* user_ptr) noexcept -> void {
+  if (user_ptr == nullptr) {
+    return;
+  }
+
+  // We need to peek at the header to get size/category for the hook
+  // BEFORE we free the memory.
+
+  // 1. Instrument it
+  if (const AllocationHeader* header = AllocationHeader::FromUserPtr(user_ptr);
+      header->IsValid()) {
+    NotifyDeallocation(user_ptr, header->size, header->category);
+  }
+
+  // 2. Perform the actual deallocation
+  internal::DeallocateCore(user_ptr);
 }
 
 // RAII Wrapper (Renamed per feedback)
@@ -200,8 +236,8 @@ class TrackedBuffer {
       const size_t count, const size_t alignment = alignof(T),
       const MemoryCategory cat = MemoryCategory::Generic,
       const std::source_location& loc = std::source_location::current())
-      : m_category_(cat) {
-    m_ptr_ = static_cast<T*>(Allocate(sizeof(T) * count, alignment, cat, loc));
+      : m_ptr_(static_cast<T*>(Allocate(sizeof(T) * count, alignment, cat, loc))), m_category_(cat) {
+    // m_ptr_ = static_cast<T*>(Allocate(sizeof(T) * count, alignment, cat, loc));
   }
 
   ~TrackedBuffer() {

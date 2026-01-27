@@ -1,9 +1,11 @@
+module;
+#include <cstddef>
+#include <source_location>
+
 export module Rhodo.Memory:Hooks;
 
 import :Categories;
 
-import <cstddef>;
-import <source_location>;
 
 export namespace rhodo::memory {
 
@@ -38,7 +40,7 @@ inline auto NotifyAllocation(
     void* ptr, const size_t size, const MemoryCategory category,
     const std::source_location& loc = std::source_location::current()) noexcept
     -> void {
-  if (g_alloc_hook != nullptr) [[likely]] {
+  if (g_alloc_hook != nullptr) {
     g_alloc_hook(ptr, size, category, loc);
   }
 }
