@@ -20,6 +20,12 @@ if(RH_ENABLE_DEBUG)
     add_compile_definitions(RH_ENABLE_DEBUG)
 endif ()
 
+option(RH_ENABLE_INSTRUMENTATION "Enable runtime instrumentation" OFF)
+
+if(RH_ENABLE_INSTRUMENTATION)
+    add_compile_definitions(RH_ENABLE_INSTRUMENTATION)
+endif()
+
 option(RH_ENABLE_CLANG_TIDY "Enable clang-tidy checks" ON)
 option(RH_ENABLE_CLANG_FORMAT "Enable clang-format target" ON)
 

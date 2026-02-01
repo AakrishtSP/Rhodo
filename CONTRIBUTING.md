@@ -114,19 +114,19 @@ All modules use **PascalCase hierarchical naming**:
 export module Rhodo;
 
 // ✅ Subsystems
-export module Rhodo.Logger;
-export module Rhodo.Signals;
+export module Rhodo.Core.Logger;
+export module Rhodo.Core.Signals;
 
 // ✅ Partitions (implementation)
-export module Rhodo.Logger:Impl;
-export module Rhodo.Signals:ScopedConnection;
+export module Rhodo.Core.Logger:Impl;
+export module Rhodo.Core.Signals:ScopedConnection;
 ```
 
 Files must match module names:
 
-- `Rhodo.Logger` → `Logger.cppm`
-- `Rhodo.Logger:Impl` → `LoggerImpl.cppm`
-- `Rhodo.Signals:ScopedConnection` → `ScopedConnection.cppm`
+- `Rhodo.Core.Logger` → `Logger.cppm`
+- `Rhodo.Core.Logger:Impl` → `LoggerImpl.cppm`
+- `Rhodo.Core.Signals:ScopedConnection` → `ScopedConnection.cppm`
 
 See [Module Naming Guide](docs/MODULE_NAMING.md) for details.
 
