@@ -14,20 +14,21 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Export compile commands for IDE and tools
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+option(RH_ENABLE_CLANG_TIDY "Enable clang-tidy checks" ON)
+option(RH_ENABLE_CLANG_FORMAT "Enable clang-format target" ON)
+
 option(RH_ENABLE_DEBUG "Enable debug utilities" ON)
-if(RH_ENABLE_DEBUG)
+if (RH_ENABLE_DEBUG)
     message("Debug utilities enabled")
     add_compile_definitions(RH_ENABLE_DEBUG)
 endif ()
 
 option(RH_ENABLE_INSTRUMENTATION "Enable runtime instrumentation" OFF)
 
-if(RH_ENABLE_INSTRUMENTATION)
+if (RH_ENABLE_INSTRUMENTATION)
     add_compile_definitions(RH_ENABLE_INSTRUMENTATION)
-endif()
+endif ()
 
-option(RH_ENABLE_CLANG_TIDY "Enable clang-tidy checks" ON)
-option(RH_ENABLE_CLANG_FORMAT "Enable clang-format target" ON)
 
 # Add custom module paths
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/thirdparty/")
@@ -38,19 +39,19 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     message(STATUS "Setting build type to 'Release' as none was specified")
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build" FORCE)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
-endif()
+endif ()
 
 
 # Platform detection
-if(WIN32)
+if (WIN32)
     set(RH_PLATFORM "Windows" CACHE INTERNAL "")
-elseif(APPLE)
+elseif (APPLE)
     set(RH_PLATFORM "Mac" CACHE INTERNAL "")
-elseif(UNIX)
+elseif (UNIX)
     set(RH_PLATFORM "Linux" CACHE INTERNAL "")
-else()
+else ()
     set(RH_PLATFORM "Unknown" CACHE INTERNAL "")
-endif()
+endif ()
 
 # Helper function for per-target output directories
 function(set_target_output_dirs target_name)
@@ -62,7 +63,7 @@ function(set_target_output_dirs target_name)
     )
 
     # Per-configuration directories for multi-config generators
-    foreach(OUTPUT_CONFIG Debug Release RelWithDebInfo MinSizeRel)
+    foreach (OUTPUT_CONFIG Debug Release RelWithDebInfo MinSizeRel)
         string(TOUPPER ${OUTPUT_CONFIG} OUTPUT_CONFIG_UPPER)
         set_target_properties(${target_name} PROPERTIES
                 RUNTIME_OUTPUT_DIRECTORY_${OUTPUT_CONFIG_UPPER}
@@ -72,13 +73,13 @@ function(set_target_output_dirs target_name)
                 ARCHIVE_OUTPUT_DIRECTORY_${OUTPUT_CONFIG_UPPER}
                 ${CMAKE_BINARY_DIR}/${OUTPUT_CONFIG}/lib/
         )
-    endforeach()
+    endforeach ()
 endfunction()
 
 # Include code quality tools
 include(cmake/ClangFormat.cmake)
-include(cmake/ClangTidy.cmake)
 include(cmake/CodeQuality.cmake)
+include(cmake/ClangTidy.cmake)
 
 # Add subdirectories (no project() calls in subdirectories)
 add_subdirectory(engine)
