@@ -33,6 +33,7 @@ Checks: >
   -readability-redundant-declaration,
   -readability-identifier-length,
   -misc-include-cleaner,
+  -misc-unused-alias-decls,
 
 WarningsAsErrors: >
   bugprone-*,
