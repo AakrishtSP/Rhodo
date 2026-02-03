@@ -15,32 +15,33 @@ inline EmitBeginHookFn g_emit_begin_hook = nullptr;
 inline EmitEndHookFn g_emit_end_hook = nullptr;
 
 // Registration API
-inline auto SetEmitBeginHook(EmitBeginHookFn hook) noexcept -> void {
-    g_emit_begin_hook = hook;
+inline auto set_emit_begin_hook(EmitBeginHookFn hook) noexcept -> void {
+  g_emit_begin_hook = hook;
 }
 
-inline auto SetEmitEndHook(EmitEndHookFn hook) noexcept -> void {
-    g_emit_end_hook = hook;
+inline auto set_emit_end_hook(EmitEndHookFn hook) noexcept -> void {
+  g_emit_end_hook = hook;
 }
 
-inline auto ClearHooks() noexcept -> void {
-    g_emit_begin_hook = nullptr;
-    g_emit_end_hook = nullptr;
+inline auto clear_hooks() noexcept -> void {
+  g_emit_begin_hook = nullptr;
+  g_emit_end_hook = nullptr;
 }
 
 // Helper for internal use
-inline auto NotifyEmitBegin(
+inline auto notify_emit_begin(
     const std::string_view name,
-                            const std::source_location& loc = std::source_location::current()) noexcept -> void {
-    if (g_emit_begin_hook != nullptr) {
-        g_emit_begin_hook(name, loc);
-    }
+    const std::source_location& loc = std::source_location::current()) noexcept
+    -> void {
+  if (g_emit_begin_hook != nullptr) {
+    g_emit_begin_hook(name, loc);
+  }
 }
 
-inline auto NotifyEmitEnd() noexcept -> void {
-    if (g_emit_end_hook != nullptr) {
-        g_emit_end_hook();
-    }
+inline auto notify_emit_end() noexcept -> void {
+  if (g_emit_end_hook != nullptr) {
+    g_emit_end_hook();
+  }
 }
 
 } // namespace rhodo::core::signals

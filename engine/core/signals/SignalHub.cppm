@@ -13,18 +13,18 @@ export namespace rhodo {
 class SignalHub {
  public:
   template <typename... Args>
-  auto Get(const std::string& name) -> Signal<Args...>&;
+  auto get(const std::string& name) -> Signal<Args...>&;
 
   template <typename... Args>
-  auto Remove(const std::string& name) -> void;
+  auto remove(const std::string& name) -> void;
 
-  auto Clear() noexcept -> void;
-  auto CleanupEmptySignals() -> void;
+  auto clear() noexcept -> void;
+  auto cleanup_empty_signals() -> void;
 
   template <typename... Args>
-  [[nodiscard]] auto Has(const std::string& name) const noexcept -> bool;
+  [[nodiscard]] auto has(const std::string& name) const noexcept -> bool;
 
-  [[nodiscard]] auto Size() const noexcept -> size_t;
+  [[nodiscard]] auto size() const noexcept -> size_t;
 
  private:
   struct SignalKey {
@@ -45,14 +45,14 @@ class SignalHub {
     ISignalHolder(ISignalHolder&&) = delete;
     auto operator=(ISignalHolder&&) -> ISignalHolder& = delete;
 
-    [[nodiscard]] virtual auto IsEmpty() const noexcept -> bool = 0;
+    [[nodiscard]] virtual auto is_empty() const noexcept -> bool = 0;
   };
 
   template <typename... Args>
   struct SignalHolder final : ISignalHolder {
     SignalHolder() = default;
     Signal<Args...> signal{};
-    [[nodiscard]] auto IsEmpty() const noexcept -> bool override;
+    [[nodiscard]] auto is_empty() const noexcept -> bool override;
   };
 
   std::unordered_map<SignalKey, std::unique_ptr<ISignalHolder>, SignalKeyHash>

@@ -5,17 +5,15 @@ export import Rhodo.Infrastructure.Instrumentation.Signals;
 export import Rhodo.Infrastructure.Instrumentation.Profiling;
 
 namespace rhodo::infrastructure::instrumentation {
+    export void initialize() {
+        memory::initialize();
+        signals::initialize();
+        profiling::initialize();
+    }
 
-export void Initialize() {
-    memory::Initialize();
-    signals::Initialize();
-    profiling::Initialize();
-}
-
-export void Shutdown() {
-    profiling::Shutdown();
-    signals::Shutdown();
-    memory::Shutdown();
-}
-
+    export void shutdown() {
+        profiling::shutdown();
+        signals::shutdown();
+        memory::shutdown();
+    }
 }

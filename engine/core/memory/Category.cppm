@@ -32,33 +32,34 @@ export enum class MemoryCategory : uint8_t {
 };
 
 namespace detail {
-constexpr std::array kCategoryNames = {
-  //NOLINTBEGIN(*-macro-usage)
+constexpr std::array k_category_names = {
+// NOLINTBEGIN(*-macro-usage)
 #define X(name) std::string_view{#name},
     RHODO_MEMORY_CATEGORIES(X)
 #undef X
-  //NOLINTEND(*-macro-usage)
+    // NOLINTEND(*-macro-usage)
 };
 
-static_assert(kCategoryNames.size() ==
+static_assert(k_category_names.size() ==
                   static_cast<size_t>(MemoryCategory::Count),
               "Category name count must match enum count");
 }  // namespace detail
 
-export constexpr auto CategoryName(MemoryCategory cat) noexcept
+export constexpr auto category_name(MemoryCategory cat) noexcept
     -> std::string_view {
   const auto id = static_cast<size_t>(cat);
   if (id >= static_cast<size_t>(MemoryCategory::Count)) {
     return "Invalid";
   }
-  return detail::kCategoryNames[id]; // NOLINT(*-pro-bounds-avoid-unchecked-container-access)
+  return detail::k_category_names
+      [id];  // NOLINT(*-pro-bounds-avoid-unchecked-container-access)
 }
 
-export constexpr auto CategoryIndex(MemoryCategory cat) noexcept -> size_t {
+export constexpr auto category_index(MemoryCategory cat) noexcept -> size_t {
   return static_cast<size_t>(cat);
 }
 
-export constexpr auto CategoryCount() noexcept -> size_t {
+export constexpr auto category_count() noexcept -> size_t {
   return static_cast<size_t>(MemoryCategory::Count);
 }
 

@@ -10,45 +10,45 @@ export import :SignalHub;
 export import :ScopedConnection;
 export import :Hooks;
 export namespace rhodo::core::signals {
-constexpr auto Global() noexcept -> SignalHub& {
+constexpr auto global() noexcept -> SignalHub& {
   static SignalHub hub;
   return hub;
 }
 
 template <typename... Args>
-auto Get(const std::string& name) -> Signal<Args...>& {
-  return Global().Get<Args...>(name);
+auto get(const std::string& name) -> Signal<Args...>& {
+  return global().get<Args...>(name);
 }
 
 template <typename... Args>
-[[nodiscard]] auto Has(const std::string& name) noexcept -> bool {
-  return Global().Has<Args...>(name);
+[[nodiscard]] auto has(const std::string& name) noexcept -> bool {
+  return global().has<Args...>(name);
 }
 
 template <typename... Args>
-auto Remove(const std::string& name) -> void {
-  Global().Remove<Args...>(name);
+auto remove(const std::string& name) -> void {
+  global().remove<Args...>(name);
 }
 
-inline auto Clear() noexcept -> void {
-  Global().Clear();
+inline auto clear() noexcept -> void {
+  global().clear();
 }
 
-inline auto CleanupEmpty() -> void {
-  Global().CleanupEmptySignals();
+inline auto cleanup_empty() -> void {
+  global().cleanup_empty_signals();
 }
 
 template <typename... Args>
-[[nodiscard]] auto MakeScopedConnection(Signal<Args...>& signal,
-                                        std::function<void(Args...)> callback)
+[[nodiscard]] auto make_scoped_connection(Signal<Args...>& signal,
+                                          std::function<void(Args...)> callback)
     -> ScopedConnection<Args...> {
   auto signal_id = signal.Connect(std::move(callback));
   return ScopedConnection<Args...>(signal, signal_id);
 }
 
 template <typename... Args, typename T>
-[[nodiscard]] auto MakeScopedConnection(Signal<Args...>& signal, T& obj,
-                                        void (T::*method)(Args...))
+[[nodiscard]] auto make_scoped_connection(Signal<Args...>& signal, T& obj,
+                                          void (T::*method)(Args...))
     -> ScopedConnection<Args...> {
   auto signal_id = signal.Connect(obj, method);
   return ScopedConnection<Args...>(signal, signal_id);

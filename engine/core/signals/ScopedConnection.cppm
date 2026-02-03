@@ -16,8 +16,8 @@ class ScopedConnection {
   ScopedConnection(const ScopedConnection&)                    = delete;
   auto operator=(const ScopedConnection&) -> ScopedConnection& = delete;
 
-  auto                   Disconnect() noexcept -> void;
-  [[nodiscard]] auto     Connected() const noexcept -> bool;
+  auto disconnect() noexcept -> void;
+  [[nodiscard]] auto connected() const noexcept -> bool;
   [[nodiscard]] explicit operator bool() const noexcept;
 
  private:

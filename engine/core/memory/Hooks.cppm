@@ -22,21 +22,21 @@ inline AllocHookFn g_alloc_hook = nullptr;
 inline FreeHookFn g_free_hook = nullptr;
 
 // Hook Registration API
-inline auto SetAllocationHook(AllocHookFn hook) noexcept -> void {
+inline auto set_allocation_hook(AllocHookFn hook) noexcept -> void {
   g_alloc_hook = hook;
 }
 
-inline auto SetDeallocationHook(FreeHookFn hook) noexcept -> void {
+inline auto set_deallocation_hook(FreeHookFn hook) noexcept -> void {
   g_free_hook = hook;
 }
 
-inline auto ClearHooks() noexcept -> void {
+inline auto clear_hooks() noexcept -> void {
   g_alloc_hook = nullptr;
   g_free_hook = nullptr;
 }
 
 // Hook Invocation Helpers (Used by Allocators)
-inline auto NotifyAllocation(
+inline auto notify_allocation(
     void* ptr, const size_t size, const MemoryCategory category,
     const std::source_location& loc = std::source_location::current()) noexcept
     -> void {
@@ -45,8 +45,9 @@ inline auto NotifyAllocation(
   }
 }
 
-inline auto NotifyDeallocation(void* ptr, const size_t size,
-                               const MemoryCategory category) noexcept -> void {
+inline auto notify_deallocation(void* ptr, const size_t size,
+                                const MemoryCategory category) noexcept
+    -> void {
   if (g_free_hook != nullptr) [[likely]] {
     g_free_hook(ptr, size, category);
   }

@@ -13,7 +13,7 @@ ScopedConnection<Args...>::ScopedConnection(Signal<Args...>& signal,
 
 template <typename... Args>
 ScopedConnection<Args...>::~ScopedConnection() noexcept {
-  Disconnect();
+  disconnect();
 }
 
 template <typename... Args>
@@ -27,7 +27,7 @@ template <typename... Args>
 auto ScopedConnection<Args...>::operator=(ScopedConnection&& other) noexcept
     -> ScopedConnection& {
   if (this != &other) {
-    Disconnect();
+    disconnect();
     signal_ = other.signal_;
     id_ = other.id_;
     other.signal_ = nullptr;
@@ -37,7 +37,7 @@ auto ScopedConnection<Args...>::operator=(ScopedConnection&& other) noexcept
 }
 
 template <typename... Args>
-auto ScopedConnection<Args...>::Disconnect() noexcept -> void {
+auto ScopedConnection<Args...>::disconnect() noexcept -> void {
   if (signal_) {
     signal_->disconnect(id_);
     signal_ = nullptr;
@@ -46,12 +46,12 @@ auto ScopedConnection<Args...>::Disconnect() noexcept -> void {
 }
 
 template <typename... Args>
-auto ScopedConnection<Args...>::Connected() const noexcept -> bool {
+auto ScopedConnection<Args...>::connected() const noexcept -> bool {
   return signal_ != nullptr;
 }
 
 template <typename... Args>
 ScopedConnection<Args...>::operator bool() const noexcept {
-  return Connected();
+  return connected();
 }
 }  // namespace rhodo

@@ -13,7 +13,7 @@ using ProfileEndFn = void (*)();
 inline ProfileBeginFn g_profile_begin = nullptr;
 inline ProfileEndFn g_profile_end = nullptr;
 
-inline void SetProfilerHooks(const ProfileBeginFn begin,
+inline void set_profiler_hooks(const ProfileBeginFn begin,
                              const ProfileEndFn end) {
   if (begin != nullptr) {
     g_profile_begin = begin;

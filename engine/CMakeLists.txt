@@ -1,10 +1,11 @@
-if(RH_ENABLE_INSTRUMENTATION)
+if (RH_ENABLE_INSTRUMENTATION)
     message("Enabled Instrumentation")
     add_subdirectory(infrastructure)
     add_compile_definitions(RH_ENABLE_INSTRUMENTATION)
-endif()
+endif ()
 
 add_subdirectory(core)
+add_subdirectory(io)
 
 # Create static library
 add_library(Rhodo STATIC)
@@ -19,12 +20,13 @@ target_sources(Rhodo
 target_link_libraries(Rhodo
         PUBLIC
         RhodoCore
+        RhodoIo
 )
 
 # Conditionally link instrumentation
-if(RH_ENABLE_INSTRUMENTATION)
+if (RH_ENABLE_INSTRUMENTATION)
     target_link_libraries(Rhodo PUBLIC RhodoInfrastructureInstrumentation)
-endif()
+endif ()
 
 # Build configuration defines (works with both single-config and multi-config generators)
 target_compile_definitions(Rhodo
@@ -45,3 +47,4 @@ target_compile_definitions(Rhodo
 set_target_output_dirs(Rhodo)
 
 register_code_quality(Rhodo)
+

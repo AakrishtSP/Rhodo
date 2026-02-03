@@ -1,9 +1,9 @@
 module;
-#include  <cassert>
-#include  <cstddef>
-#include  <cstdint>
-#include  <cstdlib>
-#include  <source_location>
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+#include <source_location>
 
 export module Rhodo.Core.Memory:Allocator;
 
@@ -19,10 +19,10 @@ struct alignas(std::max_align_t) AllocationHeader {
   uint32_t offset{};  // Distance from this header to raw allocation
   MemoryCategory category{};
 
-  static constexpr uint32_t kMagic = 0xDEADC0DE;
-  static constexpr uint32_t kFreedMagic = 0xDEADF00D;
+  static constexpr uint32_t k_magic = 0xDEADC0DE;
+  static constexpr uint32_t k_freed_magic = 0xDEADF00D;
 
-  static auto FromUserPtr(void* user_ptr) noexcept -> AllocationHeader* {
+  static auto from_user_ptr(void* user_ptr) noexcept -> AllocationHeader* {
     // NOLINTBEGIN(*-pro-type-reinterpret-cast,
     // *-pro-bounds-pointer-arithmetic)
     //   → Safe: recovering header we placed immediately before user_ptr
@@ -32,11 +32,11 @@ struct alignas(std::max_align_t) AllocationHeader {
     // *-pro-bounds-pointer-arithmetic)
   }
 
-  [[nodiscard]] auto IsValid() const noexcept -> bool {
-    return magic == kMagic;
+  [[nodiscard]] auto is_valid() const noexcept -> bool {
+    return magic == k_magic;
   }
 
-  auto MarkFreed() noexcept -> void { magic = kFreedMagic; }
+  auto mark_freed() noexcept -> void { magic = k_freed_magic; }
 };
 
 // Guard Bytes (Optional - Debug Only)
@@ -62,9 +62,9 @@ inline auto CheckGuard(void* ptr, const char* location) noexcept -> bool {
 }  // namespace detail
 #else
 namespace detail {
-constexpr size_t kGuardSize = 0;
-inline auto FillGuard(void* /*ptr*/) noexcept -> void {}
-inline auto CheckGuard(void* /*ptr*/, const char* /*location*/) noexcept
+constexpr size_t k_guard_size = 0;
+inline auto fill_guard(void* /*ptr*/) noexcept -> void {}
+inline auto check_guard(void* /*ptr*/, const char* /*location*/) noexcept
     -> bool {
   return true;
 }
@@ -77,21 +77,21 @@ inline auto CheckGuard(void* /*ptr*/, const char* /*location*/) noexcept
 
 namespace internal {
 
-inline auto AllocateCore(const size_t size, const size_t alignment,
-                         const MemoryCategory category) noexcept -> void* {
+inline auto allocate_core(const size_t size, const size_t alignment,
+                          const MemoryCategory category) noexcept -> void* {
   // Validate alignment is power of 2
   assert(std::has_single_bit(alignment) && "Alignment must be power of 2");
 
   // Ensure header is properly aligned
-  constexpr size_t kHeaderAlign = alignof(AllocationHeader);
+  constexpr size_t k_header_align = alignof(AllocationHeader);
   const size_t effective_alignment =
-      (alignment > kHeaderAlign) ? alignment : kHeaderAlign;
+      (alignment > k_header_align) ? alignment : k_header_align;
 
   // Calculate total space:
   // [padding][Header][guard][user_data][guard]
-  constexpr size_t kHeaderSize = sizeof(AllocationHeader);
+  constexpr size_t k_header_size = sizeof(AllocationHeader);
   const size_t total_needed =
-      size + kHeaderSize + (2 * detail::kGuardSize) + effective_alignment;
+      size + k_header_size + (2 * detail::k_guard_size) + effective_alignment;
 
   // Raw allocation
   // NOLINTBEGIN(*-no-malloc, *-owning-memory)
@@ -106,16 +106,17 @@ inline auto AllocateCore(const size_t size, const size_t alignment,
   // NOLINTBEGIN(*-pro-type-reinterpret-cast)
   const auto raw_addr = reinterpret_cast<uintptr_t>(raw_ptr);
   // NOLINTEND(*-pro-type-reinterpret-cast)
-  const uintptr_t min_user_addr = raw_addr + kHeaderSize + detail::kGuardSize;
+  const uintptr_t min_user_addr =
+      raw_addr + k_header_size + detail::k_guard_size;
   const uintptr_t aligned_user_addr =
       (min_user_addr + effective_alignment - 1) & ~(effective_alignment - 1);
 
   // Place header immediately before front guard
   // NOLINTBEGIN(*-pro-type-reinterpret-cast, *-no-int-to-ptr)
   auto* header = reinterpret_cast<AllocationHeader*>(
-      aligned_user_addr - detail::kGuardSize - kHeaderSize);
+      aligned_user_addr - detail::k_guard_size - k_header_size);
   // NOLINTEND(*-pro-type-reinterpret-cast, *-no-int-to-ptr)
-  header->magic = AllocationHeader::kMagic;
+  header->magic = AllocationHeader::k_magic;
   header->size = size;
   // NOLINTBEGIN(*-pro-type-reinterpret-cast)
   header->offset =
@@ -128,14 +129,14 @@ inline auto AllocateCore(const size_t size, const size_t alignment,
   header->category = category;
 
   // Fill guard bytes
-  if constexpr (detail::kGuardSize > 0) {
+  if constexpr (detail::k_guard_size > 0) {
     // NOLINTBEGIN(*-pro-type-reinterpret-cast, *-no-int-to-ptr)
     auto* front_guard =
-        reinterpret_cast<void*>(aligned_user_addr - detail::kGuardSize);
+        reinterpret_cast<void*>(aligned_user_addr - detail::k_guard_size);
     auto* back_guard = reinterpret_cast<void*>(aligned_user_addr + size);
     // NOLINTEND(*-pro-type-reinterpret-cast, *-no-int-to-ptr)
-    detail::FillGuard(front_guard);
-    detail::FillGuard(back_guard);
+    detail::fill_guard(front_guard);
+    detail::fill_guard(back_guard);
   }
   // NOLINTBEGIN(*-pro-type-reinterpret-cast, *-no-int-to-ptr)
   auto* user_ptr = reinterpret_cast<void*>(aligned_user_addr);
@@ -144,29 +145,29 @@ inline auto AllocateCore(const size_t size, const size_t alignment,
   return user_ptr;
 }
 
-inline auto DeallocateCore(void* user_ptr) noexcept -> void {
+inline auto deallocate_core(void* user_ptr) noexcept -> void {
   if (user_ptr == nullptr) {
     return;
   }
 
   // Retrieve and validate header
-  AllocationHeader* header = AllocationHeader::FromUserPtr(user_ptr);
+  AllocationHeader* header = AllocationHeader::from_user_ptr(user_ptr);
 
-  if (!header->IsValid()) [[unlikely]] {
+  if (!header->is_valid()) [[unlikely]] {
     // Corruption or double-free detected
     assert(false && "Memory corruption or double-free detected!");
     return;
   }
 
   // Check guard bytes
-  if constexpr (detail::kGuardSize > 0) {
+  if constexpr (detail::k_guard_size > 0) {
     // NOLINTBEGIN(*-pro-bounds-pointer-arithmetic)
-    void* front_guard = static_cast<char*>(user_ptr) - detail::kGuardSize;
+    void* front_guard = static_cast<char*>(user_ptr) - detail::k_guard_size;
     void* back_guard = static_cast<char*>(user_ptr) + header->size;
     // NOLINTEND(*-pro-bounds-pointer-arithmetic)
 
-    bool const front_ok = detail::CheckGuard(front_guard, "front");
-    if (bool const back_ok = detail::CheckGuard(back_guard, "back");
+    bool const front_ok = detail::check_guard(front_guard, "front");
+    if (bool const back_ok = detail::check_guard(back_guard, "back");
         !front_ok || !back_ok) [[unlikely]] {
       // Buffer under/overflow detected
       assert(false && "Buffer overflow/underflow detected!");
@@ -178,7 +179,7 @@ inline auto DeallocateCore(void* user_ptr) noexcept -> void {
   void* raw_ptr = reinterpret_cast<char*>(header) - header->offset;
   // NOLINTEND(*-pro-type-reinterpret-cast, *-pro-bounds-pointer-arithmetic)
 
-  header->MarkFreed();
+  header->mark_freed();
   std::free(raw_ptr);  // NOLINT(*-owning-memory, *-no-malloc)
 }
 
@@ -189,23 +190,23 @@ inline auto DeallocateCore(void* user_ptr) noexcept -> void {
 // -----------------------------------------------------------------------------
 
 // Core Allocation Function
-inline auto Allocate(const size_t size, const size_t alignment,
+inline auto allocate(const size_t size, const size_t alignment,
                      const MemoryCategory category = MemoryCategory::Generic,
                      const std::source_location& loc =
                          std::source_location::current()) noexcept -> void* {
   // 1. Perform the actual allocation
-  void* ptr = internal::AllocateCore(size, alignment, category);
+  void* ptr = internal::allocate_core(size, alignment, category);
 
   // 2. Instrument it (if successful)
   if (ptr != nullptr) {
-    NotifyAllocation(ptr, size, category, loc);
+    notify_allocation(ptr, size, category, loc);
   }
 
   return ptr;
 }
 
 // Core Deallocation Function
-inline auto Deallocate(void* user_ptr) noexcept -> void {
+inline auto deallocate(void* user_ptr) noexcept -> void {
   if (user_ptr == nullptr) {
     return;
   }
@@ -214,13 +215,14 @@ inline auto Deallocate(void* user_ptr) noexcept -> void {
   // BEFORE we free the memory.
 
   // 1. Instrument it
-  if (const AllocationHeader* header = AllocationHeader::FromUserPtr(user_ptr);
-      header->IsValid()) {
-    NotifyDeallocation(user_ptr, header->size, header->category);
+  if (const AllocationHeader* header =
+          AllocationHeader::from_user_ptr(user_ptr);
+      header->is_valid()) {
+    notify_deallocation(user_ptr, header->size, header->category);
   }
 
   // 2. Perform the actual deallocation
-  internal::DeallocateCore(user_ptr);
+  internal::deallocate_core(user_ptr);
 }
 
 // RAII Wrapper (Renamed per feedback)
@@ -236,8 +238,11 @@ class TrackedBuffer {
       const size_t count, const size_t alignment = alignof(T),
       const MemoryCategory cat = MemoryCategory::Generic,
       const std::source_location& loc = std::source_location::current())
-      : m_ptr_(static_cast<T*>(Allocate(sizeof(T) * count, alignment, cat, loc))), m_category_(cat) {
-    // m_ptr_ = static_cast<T*>(Allocate(sizeof(T) * count, alignment, cat, loc));
+      : m_ptr_(
+            static_cast<T*>(allocate(sizeof(T) * count, alignment, cat, loc))),
+        m_category_(cat) {
+    // m_ptr_ = static_cast<T*>(Allocate(sizeof(T) * count, alignment, cat,
+    // loc));
   }
 
   ~TrackedBuffer() {
@@ -268,7 +273,7 @@ class TrackedBuffer {
   auto operator=(const TrackedBuffer&) -> TrackedBuffer& = delete;
 
   // Access operators
-  auto Get() const noexcept -> T* { return m_ptr_; }
+  auto get() const noexcept -> T* { return m_ptr_; }
   auto operator->() const noexcept -> T* { return m_ptr_; }
   auto operator*() const noexcept -> T& { return *m_ptr_; }
   // NOLINTBEGIN(*-pro-bounds-pointer-arithmetic)

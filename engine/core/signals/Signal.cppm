@@ -13,40 +13,40 @@ using SlotId = uint64_t;
 template <typename... Args>
 class Signal {
  public:
-  static constexpr uint32_t kCleanupThreshold = 16;
-  auto NextId() const -> uint64_t;
+  static constexpr uint32_t k_cleanup_threshold = 16;
+  auto next_id() const -> uint64_t;
 
   // Connect - WRITE operation
   template <typename T>
-  auto Connect(T& obj, void (T::*method)(Args...)) -> SlotId;
-  auto Connect(std::function<void(Args...)> callback) -> SlotId;
+  auto connect(T& obj, void (T::*method)(Args...)) -> SlotId;
+  auto connect(std::function<void(Args...)> callback) -> SlotId;
 
   // Disconnect - WRITE
-  auto Disconnect(SlotId slot_id) -> void;
-  auto DisconnectAll() noexcept -> void;
+  auto disconnect(SlotId slot_id) -> void;
+  auto disconnect_all() noexcept -> void;
 
   // Emit signal - READ operation
   template <typename... A>
-  auto Emit(A&&... args) -> void;
+  auto emit(A&&... args) -> void;
   template <typename... A>
-  auto BlockingEmit(A&&... args) -> void;
+  auto blocking_emit(A&&... args) -> void;
 
   // Operator() as alias for emit
   template <typename... A>
   auto operator()(A&&... args) -> void;
 
   // Query
-  [[nodiscard]] auto Size() const noexcept -> size_t;  // ACTIVE slots
-  [[nodiscard]] auto ContainerSize() const noexcept
+  [[nodiscard]] auto size() const noexcept -> size_t;  // ACTIVE slots
+  [[nodiscard]] auto container_size() const noexcept
       -> size_t;  // slots incl inactive waiting for cleanup
-  [[nodiscard]] auto Empty() const noexcept -> bool;
+  [[nodiscard]] auto empty() const noexcept -> bool;
 
   // Clear all slots - WRITE operation
-  auto Clear() noexcept -> void;
-  auto ForceCleanup() -> void;
+  auto clear() noexcept -> void;
+  auto force_cleanup() -> void;
 
  private:
-  auto CleanupInternal() noexcept -> void;
+  auto cleanup_internal() noexcept -> void;
 
   struct Slot {
     std::function<void(Args...)> callback;
