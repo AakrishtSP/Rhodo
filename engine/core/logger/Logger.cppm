@@ -33,7 +33,7 @@ export namespace rhodo::core::logger {
         }
 
         static auto trace(const char *fmt, auto &&... args) -> void {
-            TraceL1(fmt, std::forward<decltype(args)>(args)...);
+            trace_l1(fmt, std::forward<decltype(args)>(args)...);
         }
 
         template<typename... Args>
